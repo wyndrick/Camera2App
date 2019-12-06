@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                    @NonNull CaptureRequest request,
                                                    @NonNull TotalCaptureResult result) {
-  
+
                         //swapImageAdapter();
                     }
                 };
@@ -314,20 +314,32 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        /**
-         * Retrieves the JPEG orientation from the specified screen rotation.
-         *
-         * @param rotation The screen rotation.
-         * @return The JPEG orientation (one of 0, 90, 270, and 360)
-         */
-//        private int getOrientation(int rotation) {
-//            // Sensor orientation is 90 for most devices, or 270 for some devices (eg. Nexus 5X)
-//            // We have to take that into account and rotate JPEG properly.
-//            // For devices with orientation of 90, we simply return our mapping from ORIENTATIONS.
-//            // For devices with orientation of 270, we need to rotate the JPEG 180 degrees.
-//            return (ORIENTATIONS.get(rotation) + mSensorOrientation + 270) % 360;
-//        }
+        private void transformImage (int width, int height) {
+            if (mTextureView == null) {
 
+                return;
+            } else try {
+                {
+                    Matrix matrix = new Matrix();
+                    int rotation = getWindowManager().getDefaultDisplay().getRotation();
+                    RectF textureRectF = new RectF(0, 0, width, height);
+                    RectF previewRectF = new RectF(0, 0, mTextureView.getHeight(), mTextureView.getWidth());
+                    float centerX = textureRectF.centerX();
+                    float centerY = textureRectF.centerY();
+                    if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
+                        previewRectF.offset(centerX - previewRectF.centerX(), centerY - previewRectF.centerY());
+                        matrix.setRectToRect(textureRectF, previewRectF, Matrix.ScaleToFit.FILL);
+                        float scale = Math.max((float) width / width, (float) height / width);
+                        matrix.postScale(scale, scale, centerX, centerY);
+                        matrix.postRotate(90 * (rotation - 2), centerX, centerY);
+                    }
+                    mTextureView.setTransform(matrix);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
 
         private final ImageReader.OnImageAvailableListener mOnImageAvailableListener
                 = new ImageReader.OnImageAvailableListener() {
@@ -427,6 +439,8 @@ public class MainActivity extends AppCompatActivity {
                 if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     //setUpCameraOutputs(width, height);
                     //configureTransform(width, height);
+
+                    transformImage(width, height);
 
                     mCameraManager.openCamera(mCameraID,mCameraCallback,mBackgroundHandler);
                 }
