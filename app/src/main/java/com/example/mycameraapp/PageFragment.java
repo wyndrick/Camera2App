@@ -5,12 +5,17 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +37,51 @@ public class PageFragment extends Fragment {
 
     private View v;
     public boolean isVideo = false;
+
+    public PageFragment() {
+        // Required empty public constructor
+    }
+
+
+    VideoView videoView;
+    ImageView imageView;
+
+//    @Override
+//    public void onViewCreated(View view, Bundle savedInstanceState) {
+//        super.onViewCreated(view, savedInstanceState);
+//        Activity activity = getActivity();
+//        v = view;
+//        path = imageResource;
+//        if (isVideo) {
+//            // установите свой путь к файлу на SD-карточке
+//
+//            imageView.setVisibility(View.GONE);
+//            videoView.setVisibility(View.VISIBLE);
+//            videoView.setVideoURI(Uri.parse("file://"+ imageResource));
+//            videoView.setMediaController(new MediaController(activity));
+//            videoView.requestFocus(0);
+//            videoView.seekTo(30);
+////            videoView.start(); // начинаем воспроизведение автоматически
+//        } else {
+//            imageView.setVisibility(View.VISIBLE);
+//            videoView.setVisibility(View.GONE);
+//            imageView.setImageURI(Uri.parse("file://"+ imageResource));
+//        }
+//
+//    }
+
+
+    public static boolean isImageFile(String path) {
+        String mimeType = URLConnection.guessContentTypeFromName(path);
+        return mimeType != null && mimeType.startsWith("image");
+    }
+    public static boolean isVideoFile(String path) {
+        String mimeType = URLConnection.guessContentTypeFromName(path);
+        return mimeType != null && mimeType.startsWith("video");
+    }
+
+    private final String TAG = "VideoFragement";
+
     public static PageFragment getInstance(String resourcePath) {
         PageFragment f = new PageFragment();
         Bundle args = new Bundle();
@@ -39,75 +90,95 @@ public class PageFragment extends Fragment {
         return f;
     }
 
-    public PageFragment() {
-        // Required empty public constructor
-    }
-
-
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        imageResource = getArguments().getString("image_source");
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_page, container, false);
-    }
+        View view = inflater.inflate(R.layout.fragment_page, container, false);
+        v = view;
+        videoView =  view.findViewById(R.id.video_thumb);
+        imageView = view.findViewById(R.id.image);
 
+        if (getArguments() != null) {
+            imageResource = getArguments().getString("image_source");
+        }
+
+        return view;
+    }
 
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        Activity activity = getActivity();
-        v = view;
-        VideoView videoView = (VideoView) view.findViewById(R.id.video_thumb);
-        ImageView imageView = (ImageView) view.findViewById(R.id.image);
-        path = imageResource;
-        if (isVideo) {
-            // установите свой путь к файлу на SD-карточке
+    public void onStart() {
+        super.onStart();
+        Log.e(TAG, "onStart: ");
+        if (imageResource != null && !TextUtils.isEmpty(imageResource)) {
+            if (isVideoFile(imageResource)) {
+                isVideo = true;
 
-            imageView.setVisibility(View.GONE);
-            videoView.setVisibility(View.VISIBLE);
-            videoView.setVideoURI(Uri.parse("file://"+ imageResource));
-//            videoView.setMediaController(new MediaController(activity));
-//            videoView.requestFocus(0);
-//            videoView.seekTo(30);
-//            videoView.start(); // начинаем воспроизведение автоматически
-        } else {
-            imageView.setVisibility(View.VISIBLE);
-            videoView.setVisibility(View.GONE);
-            imageView.setImageURI(Uri.parse("file://"+ imageResource));
+                videoView.setVideoPath(imageResource);
+
+                videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        //mp.start();
+                        //mp.setLooping(true);
+                        Log.e(TAG, "видео подготовлено: ");
+                    }
+                });
+                videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        Log.e(TAG, "EventBus.getDefault().post(new OnNextEvent());");
+        //                EventBus.getDefault().post(new OnNextEvent());
+                    }
+                });
+                videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                    @Override
+                    public boolean onError(MediaPlayer mp, int what, int extra) {
+                        return false;
+                    }
+                });
+                imageView.setVisibility(View.GONE);
+                videoView.setVisibility(View.VISIBLE);
+                if (isVisible()) {
+                    setUserVisibleHint(true);
+                }
+            } else {
+                isVideo = false;
+                imageView.setVisibility(View.VISIBLE);
+                videoView.setVisibility(View.GONE);
+                imageView.setImageURI(Uri.parse("file://"+ imageResource));
+
+            }
         }
-
     }
 
-    public void gainVisibility() {
-        if (isVideo && v != null) {
-            VideoView videoView = (VideoView) v.findViewById(R.id.video_thumb);
-            videoView.stopPlayback(); // начинаем воспроизведение автоматически
-            videoView.seekTo(30);
-            videoView.start(); // начинаем воспроизведение автоматически
-        }
-    }
-
-    public void losingVisibility() {
-        if (isVideo && v != null) {
-            VideoView videoView = (VideoView) v.findViewById(R.id.video_thumb);
-            videoView.stopPlayback(); // начинаем воспроизведение автоматически
-        }
-    }
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
 
-        if (isVideo && v != null) {
-            VideoView videoView = (VideoView) v.findViewById(R.id.video_thumb);
-            videoView.stopPlayback(); // начинаем воспроизведение автоматически
-            videoView.seekTo(30);
-            videoView.start(); // начинаем воспроизведение автоматически
+        Log.e(TAG, "setUserVisibleHint: " + isVisibleToUser);
+        if (isVideo) {
+            if (isVisibleToUser && videoView != null) {
+                videoView.start();
+            } else {
+                if (videoView != null) {
+                    videoView.pause();
+                    videoView.resume();
+                }
+            }
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause: ");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop: ");
     }
 }

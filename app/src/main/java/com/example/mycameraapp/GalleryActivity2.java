@@ -122,28 +122,28 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
         // init viewpager adapter and attach
         adapter = new ViewPagerAdapter(getSupportFragmentManager(), images);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                PageFragment cachedFragmentLeaving = adapter.getCachedItem(mCurrentItem);
-                if (cachedFragmentLeaving != null) {
-                    cachedFragmentLeaving.losingVisibility();
-                }
-                mCurrentItem = position;
-                PageFragment cachedFragmentEntering = adapter.getCachedItem(mCurrentItem);
-                if (cachedFragmentEntering != null) {
-                    cachedFragmentEntering.gainVisibility();
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-            }
-        });
+//        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+//            @Override
+//            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//            }
+//
+//            @Override
+//            public void onPageSelected(int position) {
+//                PageFragment cachedFragmentLeaving = adapter.getCachedItem(mCurrentItem);
+//                if (cachedFragmentLeaving != null) {
+//                    cachedFragmentLeaving.losingVisibility();
+//                }
+//                mCurrentItem = position;
+//                PageFragment cachedFragmentEntering = adapter.getCachedItem(position);
+//                if (cachedFragmentEntering != null) {
+//                    cachedFragmentEntering.gainVisibility();
+//                }
+//            }
+//
+//            @Override
+//            public void onPageScrollStateChanged(int state) {
+//            }
+//        });
 
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(5);
