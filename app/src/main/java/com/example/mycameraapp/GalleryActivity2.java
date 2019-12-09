@@ -39,10 +39,10 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     private BitmapFactory.Options options;
     private ViewPager viewPager;
     private ImageView btnNext, btnPrev, btnDel, btnCam, btnCard, btnMakeShot;
-    private FragmentStatePagerAdapter adapter;
+    private ViewPagerAdapter adapter;
 
     public static final String LOG_TAG = "myLogs";
-
+    int mCurrentItem = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,37 +69,37 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
             @Override
             public void onClick(View v) {
 
-                int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
-                Log.d(LOG_TAG, "viewPager.getCurrentItem() = " + viewPager.getCurrentItem());
-                Log.d(LOG_TAG, "images.size() = " + images.size());
-                Log.d(LOG_TAG, "viewPager.getCurrentItem() + images.size() - 1 = " + (itemIndex));
-                File fdelete = new File((images.get(itemIndex)));
-                if (fdelete.exists()) {
-                    if (fdelete.delete()) {
-                        //System.out.println("file Deleted :" + uri.getPath());
-                        showToast("file Deleted: " + images.get(itemIndex));
-                    } else {
-                        //System.out.println("file not Deleted :" + uri.getPath());
-                        showToast("file not Deleted: " + images.get(itemIndex));
-                    }
-
-                    images.remove(itemIndex);
-
-
-                    adapter.notifyDataSetChanged();
-                    viewPager.setAdapter(adapter);
-
-                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    Uri contentUri = Uri.fromFile(fdelete);
-                    mediaScanIntent.setData(contentUri);
-                    sendBroadcast(mediaScanIntent);
-                }
-                else {
-                    showToast("File no found!");
+            int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
+            Log.d(LOG_TAG, "viewPager.getCurrentItem() = " + viewPager.getCurrentItem());
+            Log.d(LOG_TAG, "images.size() = " + images.size());
+            Log.d(LOG_TAG, "viewPager.getCurrentItem() + images.size() - 1 = " + (itemIndex));
+            File fdelete = new File((images.get(itemIndex)));
+            if (fdelete.exists()) {
+                if (fdelete.delete()) {
+                    //System.out.println("file Deleted :" + uri.getPath());
+                    showToast("file Deleted: " + images.get(itemIndex));
+                } else {
+                    //System.out.println("file not Deleted :" + uri.getPath());
+                    showToast("file not Deleted: " + images.get(itemIndex));
                 }
 
-                //showToast("Current photo: " + images.get(viewPager.getCurrentItem()+ images.size() - 1));
-                //showToast("Current photo: " + viewPager.getCurrentItem());
+                images.remove(itemIndex);
+
+
+                adapter.notifyDataSetChanged();
+                viewPager.setAdapter(adapter);
+
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                Uri contentUri = Uri.fromFile(fdelete);
+                mediaScanIntent.setData(contentUri);
+                sendBroadcast(mediaScanIntent);
+            }
+            else {
+                showToast("File no found!");
+            }
+
+            //showToast("Current photo: " + images.get(viewPager.getCurrentItem()+ images.size() - 1));
+            //showToast("Current photo: " + viewPager.getCurrentItem());
 
             }
         });
@@ -107,10 +107,9 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         btnCam.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Intent intent = new Intent(GalleryActivity2.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+            Intent intent = new Intent(GalleryActivity2.this, MainActivity.class);
+            startActivity(intent);
+            finish();
             }
         });
 
@@ -123,6 +122,29 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
         // init viewpager adapter and attach
         adapter = new ViewPagerAdapter(getSupportFragmentManager(), images);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                PageFragment cachedFragmentLeaving = adapter.getCachedItem(mCurrentItem);
+                if (cachedFragmentLeaving != null) {
+                    cachedFragmentLeaving.losingVisibility();
+                }
+                mCurrentItem = position;
+                PageFragment cachedFragmentEntering = adapter.getCachedItem(mCurrentItem);
+                if (cachedFragmentEntering != null) {
+                    cachedFragmentEntering.gainVisibility();
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
+
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(5);
         getLoaderManager().initLoader(0, null, this);
@@ -170,19 +192,20 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // Get relevant columns for use later.
         String[] projection = {
-                MediaStore.Files.FileColumns._ID,
-                MediaStore.Files.FileColumns.DATA,
-                MediaStore.Files.FileColumns.DATE_ADDED,
-                MediaStore.Files.FileColumns.MEDIA_TYPE,
-                MediaStore.Files.FileColumns.MIME_TYPE,
-                MediaStore.Files.FileColumns.TITLE
+            MediaStore.Files.FileColumns._ID,
+            MediaStore.Files.FileColumns.DATA,
+            MediaStore.Files.FileColumns.DATE_ADDED,
+            MediaStore.Files.FileColumns.DATE_MODIFIED,
+            MediaStore.Files.FileColumns.MEDIA_TYPE,
+            MediaStore.Files.FileColumns.MIME_TYPE,
+            MediaStore.Files.FileColumns.TITLE
         };
         // Return only video and image metadata.
         String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-                + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-                + " OR "
-                + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-                + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+            + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+            + " OR "
+            + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+            + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 
         Uri queryUri = MediaStore.Files.getContentUri("external");
@@ -193,7 +216,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
                 projection,
                 selection,
                 null, // Selection args (none).
-                MediaStore.Files.FileColumns.DATE_ADDED
+                MediaStore.Files.FileColumns.DATE_MODIFIED
         );
 
         return cursorLoader;

@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -35,8 +36,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -69,12 +72,13 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CAMERA = 10001;
     private static final int REQUEST_STORAGE = 10001;
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 10002;
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 10001;
 
     // объявляем разрешение, которое нам нужно получить
     private static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
     private static final String RECORD_AUDIO_PERMISSION = Manifest.permission.RECORD_AUDIO;
     private static final String STORAGE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    private static final String READ_STORAGE_PERMISSION = Manifest.permission.READ_EXTERNAL_STORAGE;
 
     CameraService[] myCameras = null;
 
@@ -197,6 +201,14 @@ public class MainActivity extends AppCompatActivity {
             // иначе запрашиваем разрешение у пользователя
             requestPermission(STORAGE_PERMISSION, REQUEST_STORAGE);
         }
+        // проверяем разрешения: если они уже есть,
+        // то приложение продолжает работу в нормальном режиме
+        if (isPermissionGranted(READ_STORAGE_PERMISSION)) {
+//            Toast.makeText(this, "File permission received", Toast.LENGTH_SHORT).show();
+        } else {
+            // иначе запрашиваем разрешение у пользователя
+            requestPermission(READ_STORAGE_PERMISSION, REQUEST_STORAGE);
+        }
 
         mButtonOpenCamera1 =  findViewById(R.id.change_camera);
         //mButtonOpenCamera2 =  findViewById(R.id.change_camera2);
@@ -218,31 +230,29 @@ public class MainActivity extends AppCompatActivity {
         mButtonSwitchCameraSession.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                for (CameraService camera : myCameras) {
+                    if (camera != null) {
+                        if (camera.isOpen()) {
+                            camera.closeCamera();
+                        }
+                    }
+                }
                 if (mCurrentSessionIsVideo) {
                     if (isPressed) {
                         //start camera 1 (back)
-                        if (myCameras[CAMERA2].isOpen()) {myCameras[CAMERA2].closeCamera();}
                         if (myCameras[CAMERA1] != null) {
                             if (!myCameras[CAMERA1].isOpen()) myCameras[CAMERA1].openCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         }
                     } else {
                         //start camera 2 (front)
-                        if (myCameras[CAMERA1].isOpen()) {myCameras[CAMERA1].closeCamera();}
                         if (myCameras[CAMERA2] != null) {
                             if (!myCameras[CAMERA2].isOpen()) myCameras[CAMERA2].openCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         }
                     }
+                    mButtonSwitchCameraSession.setImageResource(R.drawable.asset9);
                     mCurrentSessionIsVideo = false;
                 }
                 else {
-                    for (CameraService camera : myCameras) {
-                        if (camera != null) {
-                            if (camera.isOpen()) {
-                                camera.closeCamera();
-                            }
-                        }
-//
-                    }
                     if (isPressed) {
                         if (!myCameras[CAMERA1].isOpen()) {
                             myCameras[CAMERA1].openVideoCamera(mTextureView.getWidth(), mTextureView.getHeight());
@@ -252,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
                             myCameras[CAMERA2].openVideoCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         }
                     }
+                    mButtonSwitchCameraSession.setImageResource(R.drawable.icon_photo);
                     mCurrentSessionIsVideo = true;
                 }
 
@@ -432,13 +443,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public class CameraService {
-
         private File directory;
-
         private File mFile = null;
-
         private void createDirectory() {
-
             directory = new File(
                     Environment
                             .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
@@ -618,12 +625,38 @@ public class MainActivity extends AppCompatActivity {
             mMediaRecorder.stop();
             mMediaRecorder.reset();
 
+
             Toast.makeText(MainActivity.this, "Video saved: " + mNextVideoAbsolutePath,
                     Toast.LENGTH_SHORT).show();
             Log.d(LOG_TAG, "Video saved: " + mNextVideoAbsolutePath);
+            addVideo(new File(mNextVideoAbsolutePath));
+
+
+            MyFileObserver fb = new MyFileObserver(mNextVideoAbsolutePath, FileObserver.CLOSE_WRITE);
+            fb.startWatching();
+
+
             mNextVideoAbsolutePath = null;
+
+
+
+
             startPreview();
         }
+
+
+        class MyFileObserver extends FileObserver {
+            public MyFileObserver (String path, int mask) {
+                super(path, mask);
+            }
+
+            public void onEvent(int event, String path) {
+                if (event == FileObserver.CLOSE_WRITE) {
+                    addVideo(new File(path));
+                }
+            }
+        }
+
         /**
          * Start the camera preview.
          */
@@ -679,27 +712,6 @@ public class MainActivity extends AppCompatActivity {
             builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         public void makePhoto (){
             try {
                 // This is the CaptureRequest.Builder that we use to take a picture.
@@ -717,11 +729,13 @@ public class MainActivity extends AppCompatActivity {
                                                    @NonNull CaptureRequest request,
                                                    @NonNull TotalCaptureResult result) {
 
+                        super.onCaptureCompleted(session, request, result);
+
+//                        updatePreview();
+//                        createCameraPreviewSession();
                         //swapImageAdapter();
-                        createCameraPreviewSession();
                     }
                 };
-
                 mCaptureSession.stopRepeating();
                 mCaptureSession.abortCaptures();
                 mCaptureSession.capture(captureBuilder.build(), CaptureCallback, mBackgroundHandler);
@@ -733,6 +747,20 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        /** 更新预览 */
+        protected void updatePhotosPreview()
+        {
+            if (mCaptureSession == null) return;
+            try
+            {
+                mCaptureSession.setRepeatingRequest(mPreviewBuilder.build(), null, mBackgroundHandler);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                Log.e(LOG_TAG, "updatePreview error");
+            }
+        }
 
 
         /**
@@ -755,8 +783,20 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException("Cannot get available preview/video sizes");
                 }
                 mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
+
+                Log.i(LOG_TAG, "mPreviewSize.getWidth() = " + mPreviewSize.getWidth());
+                Log.i(LOG_TAG, "mPreviewSize.getHeight() = " + mPreviewSize.getHeight());
+                Log.i(LOG_TAG, "mVideoSize.getWidth() = " + mVideoSize.getWidth());
+                Log.i(LOG_TAG, "mVideoSize.getHeight() = " + mVideoSize.getHeight());
                 mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class),
                         width, height, mVideoSize);
+                Log.i(LOG_TAG, "after PreviewSize.getWidth() = " + mPreviewSize.getWidth());
+                Log.i(LOG_TAG, "after mPreviewSize.getHeight() = " + mPreviewSize.getHeight());
+
+
+                int w = Math.round(mPreviewSize.getWidth());
+                int h = Math.round(mPreviewSize.getHeight());
+                mPreviewSize = new Size(w, h);
 
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -824,6 +864,7 @@ public class MainActivity extends AppCompatActivity {
 
                 int displayRotation = getWindowManager().getDefaultDisplay().getRotation();
 
+                mPreviewSize = new Size(1920, 1080);
                 mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
                 boolean swappedDimensions = false;
                 switch (displayRotation) {
@@ -1019,6 +1060,13 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        public Uri addVideo(File videoFile) {
+            ContentValues values = new ContentValues(3);
+            values.put(MediaStore.Video.Media.TITLE, "My video title");
+            values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+            values.put(MediaStore.Video.Media.DATA, videoFile.getAbsolutePath());
+            return getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+        }
 
         private void createCameraPreviewSession() {
 
@@ -1100,11 +1148,6 @@ public class MainActivity extends AppCompatActivity {
 //                    mMediaRecorder = new MediaRecorder();
 
 
-
-
-
-
-
                     mCameraManager.openCamera(mCameraID,mCameraCallback,mBackgroundHandler);
 
                 }
@@ -1172,7 +1215,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private class ImageSaver implements Runnable {
-
         /**
          * The JPEG image
          */

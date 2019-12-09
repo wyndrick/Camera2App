@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class PageFragment extends Fragment {
 
     private String imageResource;
@@ -41,7 +38,6 @@ public class PageFragment extends Fragment {
         f.setArguments(args);
         return f;
     }
-
 
     public PageFragment() {
         // Required empty public constructor
@@ -61,6 +57,8 @@ public class PageFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_page, container, false);
     }
 
+
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -68,17 +66,17 @@ public class PageFragment extends Fragment {
         v = view;
         VideoView videoView = (VideoView) view.findViewById(R.id.video_thumb);
         ImageView imageView = (ImageView) view.findViewById(R.id.image);
+        path = imageResource;
         if (isVideo) {
             // установите свой путь к файлу на SD-карточке
 
             imageView.setVisibility(View.GONE);
             videoView.setVisibility(View.VISIBLE);
             videoView.setVideoURI(Uri.parse("file://"+ imageResource));
-
 //            videoView.setMediaController(new MediaController(activity));
-            videoView.requestFocus(0);
-            videoView.seekTo(30);
-            videoView.start(); // начинаем воспроизведение автоматически
+//            videoView.requestFocus(0);
+//            videoView.seekTo(30);
+//            videoView.start(); // начинаем воспроизведение автоматически
         } else {
             imageView.setVisibility(View.VISIBLE);
             videoView.setVisibility(View.GONE);
@@ -87,11 +85,27 @@ public class PageFragment extends Fragment {
 
     }
 
+    public void gainVisibility() {
+        if (isVideo && v != null) {
+            VideoView videoView = (VideoView) v.findViewById(R.id.video_thumb);
+            videoView.stopPlayback(); // начинаем воспроизведение автоматически
+            videoView.seekTo(30);
+            videoView.start(); // начинаем воспроизведение автоматически
+        }
+    }
+
+    public void losingVisibility() {
+        if (isVideo && v != null) {
+            VideoView videoView = (VideoView) v.findViewById(R.id.video_thumb);
+            videoView.stopPlayback(); // начинаем воспроизведение автоматически
+        }
+    }
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
 
         if (isVideo && v != null) {
             VideoView videoView = (VideoView) v.findViewById(R.id.video_thumb);
+            videoView.stopPlayback(); // начинаем воспроизведение автоматически
             videoView.seekTo(30);
             videoView.start(); // начинаем воспроизведение автоматически
         }
