@@ -16,7 +16,9 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -26,6 +28,7 @@ import android.widget.Toast;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +41,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     private ImageView btnNext, btnPrev, btnDel, btnCam, btnCard, btnMakeShot;
     private FragmentStatePagerAdapter adapter;
 
+    public static final String LOG_TAG = "myLogs";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,17 +69,21 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
             @Override
             public void onClick(View v) {
 
-                File fdelete = new File((images.get(viewPager.getCurrentItem()+ images.size() - 1)));
+                int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
+                Log.d(LOG_TAG, "viewPager.getCurrentItem() = " + viewPager.getCurrentItem());
+                Log.d(LOG_TAG, "images.size() = " + images.size());
+                Log.d(LOG_TAG, "viewPager.getCurrentItem() + images.size() - 1 = " + (itemIndex));
+                File fdelete = new File((images.get(itemIndex)));
                 if (fdelete.exists()) {
                     if (fdelete.delete()) {
                         //System.out.println("file Deleted :" + uri.getPath());
-                        showToast("file Deleted: " + images.get(viewPager.getCurrentItem()+ images.size() - 1));
+                        showToast("file Deleted: " + images.get(itemIndex));
                     } else {
                         //System.out.println("file not Deleted :" + uri.getPath());
-                        showToast("file not Deleted: " + images.get(viewPager.getCurrentItem()+ images.size() - 1));
+                        showToast("file not Deleted: " + images.get(itemIndex));
                     }
 
-                    images.remove(viewPager.getCurrentItem()+ images.size() - 1);
+                    images.remove(itemIndex);
 
 
                     adapter.notifyDataSetChanged();
@@ -89,8 +97,6 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
                 else {
                     showToast("File no found!");
                 }
-
-
 
                 //showToast("Current photo: " + images.get(viewPager.getCurrentItem()+ images.size() - 1));
                 //showToast("Current photo: " + viewPager.getCurrentItem());
@@ -118,7 +124,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         // init viewpager adapter and attach
         adapter = new ViewPagerAdapter(getSupportFragmentManager(), images);
         viewPager.setAdapter(adapter);
-
+        viewPager.setOffscreenPageLimit(5);
         getLoaderManager().initLoader(0, null, this);
 
     }
@@ -144,6 +150,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     }
 
     private void setImagesData() {
+        images.clear();
         for (int i = 0; i < imagesPath.size(); i++) {
             images.add(imagesPath.get(i));
         }
@@ -161,27 +168,51 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Get relevant columns for use later.
         String[] projection = {
-                MediaStore.Images.Media.DATA,
+                MediaStore.Files.FileColumns._ID,
+                MediaStore.Files.FileColumns.DATA,
+                MediaStore.Files.FileColumns.DATE_ADDED,
+                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                MediaStore.Files.FileColumns.MIME_TYPE,
+                MediaStore.Files.FileColumns.TITLE
         };
-        CursorLoader cursorLoader = new CursorLoader(this, MediaStore.Images.Media.getContentUri("external"), projection, null, null, null);
+        // Return only video and image metadata.
+        String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+                + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+                + " OR "
+                + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+                + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+
+
+        Uri queryUri = MediaStore.Files.getContentUri("external");
+
+        CursorLoader cursorLoader = new CursorLoader(
+                this,
+                queryUri,
+                projection,
+                selection,
+                null, // Selection args (none).
+                MediaStore.Files.FileColumns.DATE_ADDED
+        );
 
         return cursorLoader;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
         if (data != null) {
-            //int columnIndex = data.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            data.moveToFirst();
-            do {
-                imagesPath.add(data.getString(data
-                        .getColumnIndexOrThrow(MediaStore.Images.Media.DATA)));
+            if (data.moveToFirst()) {
+                do {
+                    String path = data.getString(data.getColumnIndex(MediaStore.Video.Media.DATA));
+                    if (path.contains("/DCIM/Camera")) {
+                        imagesPath.add(path);
+                    }
+                } while (data.moveToNext());
 
-            } while (data.moveToNext());
-
-            setImagesData();
-
+                setImagesData();
+            }
             //inflateThumbnails();
         }
         //this.data = data;
