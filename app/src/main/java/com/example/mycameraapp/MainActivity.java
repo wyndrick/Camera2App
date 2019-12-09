@@ -43,6 +43,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
+import android.view.Display;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -413,12 +414,13 @@ public class MainActivity extends AppCompatActivity {
 
     private static Size chooseVideoSize(Size[] choices) {
         for (Size size : choices) {
-            if (1920 == size.getWidth() && 1080 == size.getHeight()) {
+            if ((1920 == size.getWidth() && 1080 == size.getHeight() ||
+                    (1280 == size.getWidth() && 720 == size.getHeight()))) {
                 return size;
             }
         }
         for (Size size : choices) {
-            if (size.getWidth() == size.getHeight() * 4 / 3 && size.getWidth() <= 1080) {
+            if (size.getWidth() == size.getHeight() * 16 / 9 && size.getWidth() <= 1080) {
                 return size;
             }
         }
@@ -793,10 +795,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(LOG_TAG, "after PreviewSize.getWidth() = " + mPreviewSize.getWidth());
                 Log.i(LOG_TAG, "after mPreviewSize.getHeight() = " + mPreviewSize.getHeight());
 
-
-                int w = Math.round(mPreviewSize.getWidth());
-                int h = Math.round(mPreviewSize.getHeight());
-                mPreviewSize = new Size(w, h);
 
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {

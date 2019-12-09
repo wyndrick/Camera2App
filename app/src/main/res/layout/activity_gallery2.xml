@@ -10,9 +10,7 @@
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_height="match_parent" />
 
     <ImageButton
         android:id="@+id/open_camera"
@@ -21,7 +19,8 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:background="@null"
-        android:layout_margin="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="30dp"
         android:text="Right Top"
         android:src="@drawable/asset14"/>
 
@@ -50,6 +49,7 @@
         android:id="@+id/btn_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         android:layout_marginRight="250dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
@@ -63,6 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginStart="250dp"
+        android:layout_marginBottom="10dp"
         android:background="@null"
         android:src="@drawable/asset6" />
 

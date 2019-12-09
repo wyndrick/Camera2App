@@ -140,9 +140,7 @@ public class PageFragment extends Fragment {
                 });
                 imageView.setVisibility(View.GONE);
                 videoView.setVisibility(View.VISIBLE);
-                if (isVisible()) {
-                    setUserVisibleHint(true);
-                }
+                setUserVisibleHint(mIsVisibleToUser);
             } else {
                 isVideo = false;
                 imageView.setVisibility(View.VISIBLE);
@@ -152,11 +150,12 @@ public class PageFragment extends Fragment {
             }
         }
     }
-
+    boolean mIsVisibleToUser = false;
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
 
+        mIsVisibleToUser = isVisibleToUser;
         Log.e(TAG, "setUserVisibleHint: " + isVisibleToUser);
         if (isVideo) {
             if (isVisibleToUser && videoView != null) {

@@ -85,7 +85,8 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:background="@null"
-        android:layout_margin="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="30dp"
         android:text="Right Top"
         android:src="@drawable/asset11"/>
 
