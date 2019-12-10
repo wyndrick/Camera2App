@@ -14,9 +14,11 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -72,9 +74,9 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         btnDel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-            int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
-            Log.d(LOG_TAG, "viewPager.getCurrentItem() = " + viewPager.getCurrentItem());
+            final int currentItemIndex = viewPager.getCurrentItem();
+            int itemIndex = images.size() - currentItemIndex - 1;
+            Log.d(LOG_TAG, "viewPager.getCurrentItem() = " + currentItemIndex);
             Log.d(LOG_TAG, "images.size() = " + images.size());
             Log.d(LOG_TAG, "viewPager.getCurrentItem() + images.size() - 1 = " + (itemIndex));
             File fdelete = new File((images.get(itemIndex)));
@@ -86,22 +88,20 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
                     //System.out.println("file not Deleted :" + uri.getPath());
                     showToast("file not Deleted: " + images.get(itemIndex));
                 }
-
                 images.remove(itemIndex);
-
-
-                adapter.notifyDataSetChanged();
-                viewPager.setAdapter(adapter);
 
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 Uri contentUri = Uri.fromFile(fdelete);
                 mediaScanIntent.setData(contentUri);
                 sendBroadcast(mediaScanIntent);
+
+                adapter.notifyDataSetChanged();
+                viewPager.setAdapter(adapter);
+
             }
             else {
                 showToast("File no found!");
             }
-
             //showToast("Current photo: " + images.get(viewPager.getCurrentItem()+ images.size() - 1));
             //showToast("Current photo: " + viewPager.getCurrentItem());
 
@@ -135,7 +135,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
 //                  String outputPath = sdCard + "/DCIM";
 
-                    String outputPath = Environment.getExternalStorageDirectory() + "/SDCamera2";
+                    String outputPath = Environment.getExternalStorageDirectory() + "/SDCamera";
 
                     Log.i(LOG_TAG, "Environment.getExternalStorageState() = " + outputPath);
                     String filepath = images.get(itemIndex);
@@ -150,6 +150,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
                     saveToSdCardDialog = SaveToSdCardDialogFragment.getInstance(inputPath, filename, outputPath);
                     saveToSdCardDialog.show(getSupportFragmentManager(), "dialog_save_sd_card");
+
             }
         });
 
@@ -162,7 +163,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
             @Override
             public void onPageSelected(int position) {
-                updateArrows(position);
+                updateButtons(position);
             }
 
             @Override
@@ -174,14 +175,35 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(5);
         getLoaderManager().initLoader(0, null, this);
-        updateArrows(0);
+
     }
 
-    public void updateArrows(int position){
-        btnPrev.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
-        btnNext.setVisibility(position == images.size() - 1 ? View.GONE : View.VISIBLE);
+    public void onFileMoved(String inputPath, String inputFile, String outputPath) {
+        int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
+        if (isNeedToShowMedia(outputPath + "/" + inputFile)) {
+            images.set(itemIndex, outputPath + "/" + inputFile);
+        } else {
+            images.remove(itemIndex);
+        }
+        adapter.notifyDataSetChanged();
+        viewPager.setAdapter(adapter);
+
+        updateButtons(viewPager.getCurrentItem());
     }
 
+    public void updateButtons(int position){
+        btnPrev.setVisibility(position == 0 ? View.INVISIBLE : View.VISIBLE);
+        btnNext.setVisibility(position == images.size() - 1 || images.size() == 0  ? View.INVISIBLE : View.VISIBLE);
+        btnDel.setVisibility(images.size() == 0  ? View.INVISIBLE : View.VISIBLE);
+
+        int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
+        if (images.size() > itemIndex && images.size() > 0){
+            String filePath = images.get(itemIndex);
+            btnCard.setVisibility(filePath.contains("SDCamera") ? View.INVISIBLE : View.VISIBLE);
+        } else {
+            btnCard.setVisibility(images.size() == 0  ? View.INVISIBLE : View.VISIBLE);
+        }
+    }
 
     private View.OnClickListener onClickListener(final int i) {
         return new View.OnClickListener() {
@@ -253,14 +275,20 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         return cursorLoader;
     }
 
+    public boolean isNeedToShowMedia(String path) {
+        File file = new File(path);
+        return (path.toLowerCase().contains("/dcim/camera") || path.toLowerCase().contains("/dcim/100andro"))
+                && file.exists();
+    }
+
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
+        imagesPath.clear();
         if (data != null) {
             if (data.moveToFirst()) {
                 do {
                     String path = data.getString(data.getColumnIndex(MediaStore.Video.Media.DATA));
-                    if (path.contains("/DCIM/Camera")) {
+                    if (isNeedToShowMedia(path)) {
                         imagesPath.add(path);
                     }
                 } while (data.moveToNext());
@@ -271,6 +299,8 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         }
         //this.data = data;
         adapter.notifyDataSetChanged();
+        int index = viewPager.getCurrentItem();
+        updateButtons(index);
     }
 
     @Override

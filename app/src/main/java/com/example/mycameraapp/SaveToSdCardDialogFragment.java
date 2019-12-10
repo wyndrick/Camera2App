@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -70,6 +71,8 @@ public class SaveToSdCardDialogFragment extends DialogFragment {
                 Log.d(TAG, "Dialog 1: ");
                 if (inputPath != "" && inputFile != "" && outputPath != "") {
                     moveFile(inputPath, inputFile, outputPath);
+                    ((GalleryActivity2)getActivity()).onFileMoved(inputPath, inputFile, outputPath);
+
                 }
                 dismiss();
             }
@@ -99,7 +102,7 @@ public class SaveToSdCardDialogFragment extends DialogFragment {
         Log.d(TAG, "Dialog 1: onCancel");
     }
 
-    private void moveFile(String inputPath, String inputFile, String outputPath) {
+    private boolean moveFile(String inputPath, String inputFile, String outputPath) {
         InputStream in = null;
         OutputStream out = null;
 
@@ -127,7 +130,13 @@ public class SaveToSdCardDialogFragment extends DialogFragment {
             out = null;
 
             // delete the original file
-            new File(inputPath + inputFile).delete();
+            File fileToDelete = new File(inputPath + "/" + inputFile);
+            File fileNew = new File(outputPath + "/" + inputFile);
+            fileToDelete.delete();
+            updateFileGalleryInfo(fileToDelete);
+            updateFileGalleryInfo(fileNew);
+
+            return true;
         }
 
         catch (FileNotFoundException fnfe1) {
@@ -136,6 +145,14 @@ public class SaveToSdCardDialogFragment extends DialogFragment {
         catch (Exception e) {
             Log.e("tag", e.getMessage());
         }
+        return false;
+    }
+
+    public void updateFileGalleryInfo(File file) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(file);
+        mediaScanIntent.setData(contentUri);
+        getActivity().sendBroadcast(mediaScanIntent);
     }
 
     @Override
