@@ -5,11 +5,15 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -71,15 +75,16 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = "myLogs";
 
-    private static final int REQUEST_CAMERA = 10001;
-    private static final int REQUEST_STORAGE = 10001;
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 10001;
+    private static final int REQUEST_PERMISSIONS = 10001;
+
+    private static final String[] VIDEO_PERMISSIONS = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+
+    };
 
     // объявляем разрешение, которое нам нужно получить
-    private static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
-    private static final String RECORD_AUDIO_PERMISSION = Manifest.permission.RECORD_AUDIO;
-    private static final String STORAGE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-    private static final String READ_STORAGE_PERMISSION = Manifest.permission.READ_EXTERNAL_STORAGE;
 
     CameraService[] myCameras = null;
 
@@ -166,50 +171,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
 //        Log.d(LOG_TAG, "Запрашиваем разрешение");
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-                ||
-                (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                || checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
         )
         {
-            requestPermissions(new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+            requestPermissions(VIDEO_PERMISSIONS, REQUEST_PERMISSIONS);
         }
 
-        // проверяем разрешения: если они уже есть,
-        // то приложение продолжает работу в нормальном режиме
-        if (isPermissionGranted(CAMERA_PERMISSION)) {
-//            Toast.makeText(this, "There is a permission to work with the camera, you can work", Toast.LENGTH_SHORT).show();
-        } else {
-            // иначе запрашиваем разрешение у пользователя
-            requestPermission(CAMERA_PERMISSION, REQUEST_CAMERA);
-        }
 
-        // проверяем разрешения: если они уже есть,
-        // то приложение продолжает работу в нормальном режиме
-        if (isPermissionGranted(RECORD_AUDIO_PERMISSION)) {
-//            Toast.makeText(this, "There is a permission to work with the camera, you can work", Toast.LENGTH_SHORT).show();
-        } else {
-            // иначе запрашиваем разрешение у пользователя
-            requestPermission(RECORD_AUDIO_PERMISSION, REQUEST_RECORD_AUDIO_PERMISSION);
-        }
-
-        // проверяем разрешения: если они уже есть,
-        // то приложение продолжает работу в нормальном режиме
-        if (isPermissionGranted(STORAGE_PERMISSION)) {
-//            Toast.makeText(this, "File permission received", Toast.LENGTH_SHORT).show();
-        } else {
-            // иначе запрашиваем разрешение у пользователя
-            requestPermission(STORAGE_PERMISSION, REQUEST_STORAGE);
-        }
-        // проверяем разрешения: если они уже есть,
-        // то приложение продолжает работу в нормальном режиме
-        if (isPermissionGranted(READ_STORAGE_PERMISSION)) {
-//            Toast.makeText(this, "File permission received", Toast.LENGTH_SHORT).show();
-        } else {
-            // иначе запрашиваем разрешение у пользователя
-            requestPermission(READ_STORAGE_PERMISSION, REQUEST_STORAGE);
-        }
 
         mButtonOpenCamera1 =  findViewById(R.id.change_camera);
         //mButtonOpenCamera2 =  findViewById(R.id.change_camera2);
@@ -432,7 +403,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_CAMERA) {
+        if (requestCode == REQUEST_PERMISSIONS) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(MainActivity.this, "Camera resolution obtained", Toast.LENGTH_LONG).show();
             } else {

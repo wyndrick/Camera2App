@@ -1,6 +1,7 @@
 package com.example.mycameraapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import androidx.viewpager.widget.ViewPager;
@@ -31,6 +32,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class GalleryActivity2 extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -40,6 +42,8 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     private ViewPager viewPager;
     private ImageView btnNext, btnPrev, btnDel, btnCam, btnCard, btnMakeShot;
     private ViewPagerAdapter adapter;
+
+    SaveToSdCardDialogFragment saveToSdCardDialog;
 
     public static final String LOG_TAG = "myLogs";
     int mCurrentItem = 0;
@@ -117,6 +121,35 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
             @Override
             public void onClick(View v) {
 
+                    int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
+
+//                    Map<String, File> externalLocations = ExternalStorage.getAllStorageLocations();
+//                    File sdCard = externalLocations.get(ExternalStorage.SD_CARD);
+//                    File externalSdCard = externalLocations.get(ExternalStorage.EXTERNAL_SD_CARD);
+//
+//                    for (Map.Entry<String, File> entry : externalLocations.entrySet()) {
+//                        Log.i(LOG_TAG, "entry = " + entry.getKey() + " val = " + entry.getValue().getAbsolutePath());
+//                    }
+//                    Log.i(LOG_TAG, "sdCard = " + sdCard);
+//                    Log.i(LOG_TAG, "externalSdCard = " + externalSdCard);
+
+//                  String outputPath = sdCard + "/DCIM";
+
+                    String outputPath = Environment.getExternalStorageDirectory() + "/SDCamera2";
+
+                    Log.i(LOG_TAG, "Environment.getExternalStorageState() = " + outputPath);
+                    String filepath = images.get(itemIndex);
+                    File f = new File(filepath);
+                    String filename = f.getName();
+                    String inputPath = f.getParentFile().getAbsolutePath();
+                    Log.i(LOG_TAG, "filepath = " + filepath);
+                    Log.i(LOG_TAG, "filename = " + filename);
+                    Log.i(LOG_TAG, "inputFolder = " + inputPath);
+                    Log.i(LOG_TAG, "outputPath = " + outputPath);
+
+
+                    saveToSdCardDialog = SaveToSdCardDialogFragment.getInstance(inputPath, filename, outputPath);
+                    saveToSdCardDialog.show(getSupportFragmentManager(), "dialog_save_sd_card");
             }
         });
 
@@ -136,6 +169,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
             public void onPageScrollStateChanged(int state) {
             }
         });
+
 
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(5);
