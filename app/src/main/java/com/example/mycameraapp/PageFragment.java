@@ -111,61 +111,70 @@ public class PageFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Log.e(TAG, "onStart: ");
-        if (imageResource != null && !TextUtils.isEmpty(imageResource)) {
-            if (isVideoFile(imageResource)) {
-                isVideo = true;
+        try{
+            if (imageResource != null && !TextUtils.isEmpty(imageResource)) {
+                if (isVideoFile(imageResource)) {
+                    isVideo = true;
 
-                videoView.setVideoPath(imageResource);
+                    videoView.setVideoPath(imageResource);
 
-                videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        //mp.start();
-                        //mp.setLooping(true);
-                        Log.e(TAG, "видео подготовлено: ");
-                    }
-                });
-                videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        Log.e(TAG, "EventBus.getDefault().post(new OnNextEvent());");
-        //                EventBus.getDefault().post(new OnNextEvent());
-                    }
-                });
-                videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                    @Override
-                    public boolean onError(MediaPlayer mp, int what, int extra) {
-                        return false;
-                    }
-                });
-                imageView.setVisibility(View.GONE);
-                videoView.setVisibility(View.VISIBLE);
-                setUserVisibleHint(mIsVisibleToUser);
-            } else {
-                isVideo = false;
-                imageView.setVisibility(View.VISIBLE);
-                videoView.setVisibility(View.GONE);
-                imageView.setImageURI(Uri.parse("file://"+ imageResource));
+                    videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mp) {
+                            //mp.start();
+                            //mp.setLooping(true);
+                            Log.e(TAG, "видео подготовлено: ");
+                        }
+                    });
+                    videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            Log.e(TAG, "EventBus.getDefault().post(new OnNextEvent());");
+            //                EventBus.getDefault().post(new OnNextEvent());
+                        }
+                    });
+                    videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                        @Override
+                        public boolean onError(MediaPlayer mp, int what, int extra) {
+                            return false;
+                        }
+                    });
+                    imageView.setVisibility(View.GONE);
+                    videoView.setVisibility(View.VISIBLE);
+                    setUserVisibleHint(mIsVisibleToUser);
+                } else {
+                    isVideo = false;
+                    imageView.setVisibility(View.VISIBLE);
+                    videoView.setVisibility(View.GONE);
+                    imageView.setImageURI(Uri.parse("file://"+ imageResource));
 
+                }
             }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
+
     }
     boolean mIsVisibleToUser = false;
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+        try{
 
-        mIsVisibleToUser = isVisibleToUser;
-        Log.e(TAG, "setUserVisibleHint: " + isVisibleToUser);
-        if (isVideo) {
-            if (isVisibleToUser && videoView != null) {
-                videoView.start();
-            } else {
-                if (videoView != null) {
-                    videoView.pause();
-                    videoView.resume();
+            mIsVisibleToUser = isVisibleToUser;
+            Log.e(TAG, "setUserVisibleHint: " + isVisibleToUser);
+            if (isVideo) {
+                if (isVisibleToUser && videoView != null) {
+                    videoView.start();
+                } else {
+                    if (videoView != null) {
+                        videoView.pause();
+                        videoView.resume();
+                    }
                 }
             }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 

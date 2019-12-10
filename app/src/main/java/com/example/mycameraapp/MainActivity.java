@@ -1005,7 +1005,7 @@ public class MainActivity extends AppCompatActivity {
             return getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
         }
 
-        private void createCameraPreviewSession() {
+        public void createCameraPreviewSession() {
 
             mImageReader = ImageReader.newInstance(1920,1080, ImageFormat.JPEG,1);
             mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, null);
