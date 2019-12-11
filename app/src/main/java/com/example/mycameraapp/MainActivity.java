@@ -16,6 +16,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
@@ -32,10 +34,12 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.AudioAttributes;
 import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
+import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -52,6 +56,8 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -68,6 +74,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -101,6 +109,15 @@ public class MainActivity extends AppCompatActivity {
     private HandlerThread mBackgroundThread;
     private Handler mBackgroundHandler = null;
     private ImageButton mButtonOpenGallery;
+    private ImageView mPlayVideo;
+    private TextView mTextViewTimer;
+    private int mCurrentPeriod = 0;
+    private Timer myTimer;
+
+    private SoundPool mSoundPool;
+    private AssetManager mAssetManager;
+    private int mShotSound;
+    private int mStreamID;
 
     private String PathPhoto;
 
@@ -141,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
         DEFAULT_ORIENTATIONS.append(Surface.ROTATION_270, 180);
         DEFAULT_ORIENTATIONS.append(Surface.ROTATION_180, 270);
     }
+
 
 
 
@@ -188,6 +206,8 @@ public class MainActivity extends AppCompatActivity {
         mButtonToMakeShot = findViewById(R.id.make_shot);
         mButtonOpenGallery = findViewById(R.id.open_gallery);
         mTextureView = findViewById(R.id.textureView);
+        mPlayVideo = findViewById(R.id.mPlayVideo);
+        mTextViewTimer = findViewById(R.id.txt_timer);
 
         mButtonOpenGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -222,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     mButtonSwitchCameraSession.setImageResource(R.drawable.asset9);
+                    mButtonToMakeShot.setImageResource(R.drawable.asset12);
                     mCurrentSessionIsVideo = false;
                 }
                 else {
@@ -235,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     mButtonSwitchCameraSession.setImageResource(R.drawable.icon_photo);
+                    mButtonToMakeShot.setImageResource(R.drawable.asset1212);
                     mCurrentSessionIsVideo = true;
                 }
 
@@ -279,14 +301,25 @@ public class MainActivity extends AppCompatActivity {
             {
                 for (CameraService camera : myCameras) {
                     if (mCurrentSessionIsVideo) {
-                        if (camera.isOpen()) camera.makeVideo();
+                        if (camera.isOpen()){
+                            camera.makeVideo();
+                        }
+
                     } else {
-                        if (camera.isOpen()) camera.makePhoto();
+                        if (camera.isOpen()) {
+                            camera.makePhoto();
+                            mStreamID = playSound(mShotSound);
+                        }
                     }
                 }
             }
         });
 
+        //звук для камеры
+        createNewSoundPool();
+        mAssetManager = getAssets();
+        //получим идентификаторы
+        mShotSound = loadSound("shot.ogg");
 
         mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try{
@@ -305,6 +338,36 @@ public class MainActivity extends AppCompatActivity {
             Log.e(LOG_TAG, e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void createNewSoundPool() {
+        AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        mSoundPool = new SoundPool.Builder()
+                .setAudioAttributes(attributes)
+                .build();
+    }
+
+    private int playSound(int sound) {
+        if (sound > 0) {
+            mStreamID = mSoundPool.play(sound, 1, 1, 1, 0, 1);
+        }
+        return mStreamID;
+    }
+
+    private int loadSound(String fileName) {
+        AssetFileDescriptor afd;
+        try {
+            afd = mAssetManager.openFd(fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Не могу загрузить файл " + fileName,
+                    Toast.LENGTH_SHORT).show();
+            return -1;
+        }
+        return mSoundPool.load(afd, 1);
     }
 
 
@@ -480,10 +543,47 @@ public class MainActivity extends AppCompatActivity {
         public void makeVideo() {
             if (mIsRecordingVideo) {
                 stopRecordingVideo();
+                mButtonToMakeShot.setImageResource(R.drawable.asset1212);
+                //stop timer
+                mCurrentPeriod = 0;
+                if (myTimer != null) {
+                    myTimer.cancel();
+                    myTimer = null;
+                    mTextViewTimer.setText("00:00");
+                    mTextViewTimer.setVisibility(View.GONE);
+                }
             } else {
                 startRecordingVideo();
+                mButtonToMakeShot.setImageResource(R.drawable.asset1213);
+
+                //start timer
+                mTextViewTimer.setVisibility(View.VISIBLE);
+                if (myTimer != null) {
+                    myTimer.cancel();
+                }
+
+                myTimer = new Timer();
+                myTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        TimerMethod();
+                    }
+                }, 0, 1000);
             }
         }
+
+        private void TimerMethod() {
+            runOnUiThread(Timer_Tick);
+        }
+
+        private Runnable Timer_Tick = new Runnable() {
+            public void run() {
+                mCurrentPeriod++;
+                String temp = (new SimpleDateFormat("mm:ss")).format(new Date(
+                        mCurrentPeriod * 1000));
+                mTextViewTimer.setText(temp);
+            }
+        };
 
         private void setUpMediaRecorder() throws IOException {
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);

@@ -24,7 +24,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="30dp"
         android:text="Right Top"
-        android:src="@drawable/asset14"/>
+        android:src="@drawable/asset14_press"/>
 
     <ImageButton
         android:id="@+id/make_shot"
@@ -45,7 +45,7 @@
         android:layout_alignParentBottom="true"
         android:background="@null"
         android:layout_margin="10dp"
-        android:src="@drawable/asset5"/>
+        android:src="@drawable/asset5_press"/>
 
     <ImageButton
         android:id="@+id/save_sd"
@@ -56,7 +56,7 @@
         android:text="Right Bottom"
         android:background="@null"
         android:layout_margin="10dp"
-        android:src="@drawable/asset8"/>
+        android:src="@drawable/asset8_press"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -72,15 +72,14 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="30dp"
             android:background="@null"
-            android:src="@drawable/asset6" />
+            android:src="@drawable/asset6_press" />
 
         <ImageButton
             android:id="@+id/btn_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
-
-            android:src="@drawable/asset66" />
+            android:src="@drawable/asset66_press" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -69,7 +69,8 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
         btnPrev.setOnClickListener(onClickListener(0));
         btnNext.setOnClickListener(onClickListener(1));
-        btnMakeShot.setEnabled(false);
+
+        btnMakeShot.setVisibility(View.GONE);
 
         btnDel.setOnClickListener(new View.OnClickListener() {
             @Override

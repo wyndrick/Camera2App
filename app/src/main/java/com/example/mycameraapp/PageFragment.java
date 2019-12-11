@@ -37,6 +37,7 @@ public class PageFragment extends Fragment {
 
     private View v;
     public boolean isVideo = false;
+    private ImageView mPlayVideo;
 
     public PageFragment() {
         // Required empty public constructor
@@ -98,10 +99,19 @@ public class PageFragment extends Fragment {
         v = view;
         videoView =  view.findViewById(R.id.video_thumb);
         imageView = view.findViewById(R.id.image);
+        mPlayVideo = view.findViewById(R.id.mPlayVideo);
 
         if (getArguments() != null) {
             imageResource = getArguments().getString("image_source");
         }
+
+        mPlayVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                videoView.start();
+                mPlayVideo.setVisibility(View.GONE);
+            }
+        });
 
         return view;
     }
@@ -155,6 +165,8 @@ public class PageFragment extends Fragment {
         }
 
     }
+
+
     boolean mIsVisibleToUser = false;
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
@@ -165,7 +177,8 @@ public class PageFragment extends Fragment {
             Log.e(TAG, "setUserVisibleHint: " + isVisibleToUser);
             if (isVideo) {
                 if (isVisibleToUser && videoView != null) {
-                    videoView.start();
+                    mPlayVideo.setVisibility(View.VISIBLE);
+                    //videoView.start();
                 } else {
                     if (videoView != null) {
                         videoView.pause();
