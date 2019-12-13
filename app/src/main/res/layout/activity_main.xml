@@ -63,7 +63,7 @@
 
 <!--    </LinearLayout>-->
 
-    <TextureView
+    <com.example.mycameraapp.AutoFillTextureView
         android:id="@+id/textureView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -78,6 +78,18 @@
 <!--        android:text="Left Top"-->
 <!--        android:src="@drawable/ic_camera_alt_black_24dp"/>-->
 
+    <TextView
+        android:id="@+id/txt_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="40dp"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:text="00:00"
+        android:visibility="gone"/>
+
     <ImageButton
         android:id="@+id/open_gallery"
         android:layout_width="wrap_content"
@@ -85,9 +97,10 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:background="@null"
-        android:layout_margin="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="30dp"
         android:text="Right Top"
-        android:src="@drawable/asset11"/>
+        android:src="@drawable/asset11_press"/>
 
     <ImageButton
         android:id="@+id/make_shot"
@@ -98,7 +111,7 @@
         android:text="Center"
         android:background="@null"
         android:layout_margin="10dp"
-        android:src="@drawable/asset12"/>
+        android:src="@drawable/asset12_press"/>
 
     <ImageButton
         android:id="@+id/change_camera"
@@ -108,7 +121,7 @@
         android:layout_alignParentBottom="true"
         android:background="@null"
         android:layout_margin="10dp"
-        android:src="@drawable/asset10"/>
+        android:src="@drawable/asset101_press"/>
 
     <ImageButton
         android:id="@+id/open_video"
@@ -119,7 +132,7 @@
         android:text="Right Bottom"
         android:background="@null"
         android:layout_margin="10dp"
-        android:src="@drawable/asset9"/>
+        android:src="@drawable/asset9_press"/>
 
 
 

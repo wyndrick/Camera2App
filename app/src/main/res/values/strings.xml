@@ -3,4 +3,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="permission_request">This sample needs permission for camera and audio recording.</string>
+    <string name="dialog_sd_card_title">Save to SD Card</string>
+    <string name="dialog_sd_card_message">Move all files from phone to SD card. They will still be available through the Gallery. </string>
 </resources>
