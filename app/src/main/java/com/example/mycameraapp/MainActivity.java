@@ -19,6 +19,8 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -49,6 +51,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Range;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Display;
@@ -159,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
         DEFAULT_ORIENTATIONS.append(Surface.ROTATION_180, 270);
     }
 
+    private int exposureCompensation;
 
 
 
@@ -332,6 +336,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // создаем обработчик для камеры
                 myCameras[id] = new CameraService(mCameraManager,cameraID);
+
             }
         }
         catch(CameraAccessException e){
@@ -454,8 +459,7 @@ public class MainActivity extends AppCompatActivity {
         Point displaySize = getDisplaySize();
 
         for (Size size : choices) {
-            if ((1920 == size.getWidth() && 1080 == size.getHeight() ||
-                    (1280 == size.getWidth() && 720 == size.getHeight()))) {
+            if ((1920 == size.getWidth() && 1080 == size.getHeight())) {
                 return size;
             }
         }
@@ -465,6 +469,9 @@ public class MainActivity extends AppCompatActivity {
                 return size;
             }
         }
+
+
+
         Log.e(LOG_TAG, "Couldn't find any suitable video size");
         return choices[choices.length - 1];
     }
@@ -513,6 +520,8 @@ public class MainActivity extends AppCompatActivity {
             mCameraID = cameraID;
 
         }
+
+        private Size mImageSize;
 
         /**
          * The {@link android.util.Size} of video recording.
@@ -807,9 +816,6 @@ public class MainActivity extends AppCompatActivity {
                         mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
                 captureBuilder.addTarget(mImageReader.getSurface());
 
-                //int rotation = getWindowManager().getDefaultDisplay().getRotation();
-                //captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
-
                 CameraCaptureSession.CaptureCallback CaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
                     @Override
@@ -819,9 +825,7 @@ public class MainActivity extends AppCompatActivity {
 
                         super.onCaptureCompleted(session, request, result);
 
-//                        updatePreview();
                         createCameraPreviewSession();
-                        //swapImageAdapter();
                     }
                 };
                 mCaptureSession.stopRepeating();
@@ -920,17 +924,23 @@ public class MainActivity extends AppCompatActivity {
 
             CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
             try {
+                // Получениe характеристик камеры
+                CameraCharacteristics characteristics = manager.getCameraCharacteristics(mCameraID);
 
-                CameraCharacteristics characteristics
-                        = manager.getCameraCharacteristics(mCameraID);
+                //осветление/затемнение изображения камеры
+                Range<Integer> range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
+                //double exposureCompensationSteps = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP).doubleValue();
+                //exposureCompensation = (int)( 2.0 / exposureCompensationSteps );
+                exposureCompensation = (int)setExposure(-0.5, range);
 
-
+                // Получения списка выходного формата, который поддерживает камера
                 StreamConfigurationMap map = characteristics.get(
                         CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
                 Size largest = Collections.max(
                         Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
                         new CompareSizesByArea());
+
                 mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(),
                         ImageFormat.JPEG, /*maxImages*/2);
                 mImageReader.setOnImageAvailableListener(
@@ -964,6 +974,21 @@ public class MainActivity extends AppCompatActivity {
             Point displaySize = new Point();
             getWindowManager().getDefaultDisplay().getSize(displaySize);
             return (float)displaySize.x / displaySize.y;
+        }
+
+        public float setExposure(double exposureAdjustment, Range<Integer> range1) {
+            float newCalculatedValue = 0;
+            int minExposure = range1.getLower();
+            int maxExposure = range1.getUpper();
+
+            if (minExposure != 0 || maxExposure != 0) {
+                if (exposureAdjustment >= 0) {
+                    newCalculatedValue = (float) (minExposure * exposureAdjustment);
+                } else {
+                    newCalculatedValue = (float) (maxExposure * -1 * exposureAdjustment);
+                }
+            }
+            return newCalculatedValue;
         }
 
 
@@ -1107,12 +1132,15 @@ public class MainActivity extends AppCompatActivity {
 
         public void createCameraPreviewSession() {
 
-            mImageReader = ImageReader.newInstance(1920,1080, ImageFormat.JPEG,1);
-            mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, null);
+            //mImageReader = ImageReader.newInstance(1280,720, ImageFormat.JPEG,1);
+            //mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, null);
 
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
 
-            texture.setDefaultBufferSize(1920,1080);
+            // We configure the size of default buffer to be the size of camera preview we want.
+            texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+            //texture.setDefaultBufferSize(1280,720);
+
             Surface surface = new Surface(texture);
 
             try {
@@ -1120,6 +1148,8 @@ public class MainActivity extends AppCompatActivity {
                         mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
 
                 builder.addTarget(surface);
+
+                builder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, exposureCompensation);
 
                 mCameraDevice.createCaptureSession(Arrays.asList(surface,mImageReader.getSurface()),
                         new CameraCaptureSession.StateCallback() {
