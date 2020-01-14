@@ -164,8 +164,6 @@ public class MainActivity extends AppCompatActivity {
 
     private int exposureCompensation;
 
-
-
     private void startBackgroundThread() {
         mBackgroundThread = new HandlerThread("CameraBackground");
         mBackgroundThread.start();
@@ -182,8 +180,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
-
 
     boolean mCurrentSessionIsVideo = false;
 
@@ -245,8 +241,8 @@ public class MainActivity extends AppCompatActivity {
                             if (!myCameras[CAMERA2].isOpen()) myCameras[CAMERA2].openCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         }
                     }
-                    mButtonSwitchCameraSession.setImageResource(R.drawable.asset9);
-                    mButtonToMakeShot.setImageResource(R.drawable.asset12);
+                    mButtonSwitchCameraSession.setImageResource(R.drawable.asset9_press);
+                    mButtonToMakeShot.setImageResource(R.drawable.asset12_press);
                     mCurrentSessionIsVideo = false;
                 }
                 else {
@@ -259,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                             myCameras[CAMERA2].openVideoCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         }
                     }
-                    mButtonSwitchCameraSession.setImageResource(R.drawable.icon_photo);
+                    mButtonSwitchCameraSession.setImageResource(R.drawable.icon_photo_press);
                     mButtonToMakeShot.setImageResource(R.drawable.asset1212);
                     mCurrentSessionIsVideo = true;
                 }
@@ -637,8 +633,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             try {
-
-
                 closePreviewSession();
                 setUpMediaRecorder();
                 SurfaceTexture texture = mTextureView.getSurfaceTexture();
@@ -703,7 +697,6 @@ public class MainActivity extends AppCompatActivity {
 
         private void stopRecordingVideo() {
             // UI
-
             mButtonOpenCamera1.setVisibility(View.VISIBLE);
             mButtonOpenGallery.setVisibility(View.VISIBLE);
             mButtonSwitchCameraSession.setVisibility(View.VISIBLE);
@@ -839,7 +832,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        /** 更新预览 */
         protected void updatePhotosPreview()
         {
             if (mCaptureSession == null) return;
@@ -916,8 +908,6 @@ public class MainActivity extends AppCompatActivity {
                 return choices[0];
             }
         }
-
-
 
 
         private void setUpCameraOutputs(int width, int height) {
@@ -1171,9 +1161,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
-
-
-
+        
 
         public boolean isOpen() {
             if (mCameraDevice == null) {

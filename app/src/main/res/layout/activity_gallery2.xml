@@ -35,7 +35,7 @@
         android:text="Center"
         android:background="@null"
         android:layout_margin="10dp"
-        android:src="@drawable/asset13"/>
+        android:src="@drawable/asset12"/>
 
     <ImageButton
         android:id="@+id/del_photo"
