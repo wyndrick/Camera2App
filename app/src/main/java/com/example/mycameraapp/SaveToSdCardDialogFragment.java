@@ -1,9 +1,11 @@
 package com.example.mycameraapp;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -19,6 +21,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
@@ -39,6 +44,9 @@ public class SaveToSdCardDialogFragment extends DialogFragment {
     String inputPath = "";
     String inputFile = "";
     String outputPath = "";
+
+    // Уникальный код запроса на конкретное разрешение private
+    private static int REQUEST_EXTERNAL_STORAGE = 1;
 
     public static SaveToSdCardDialogFragment getInstance(String inputPath, String inputFile, String outputPath) {
         SaveToSdCardDialogFragment f = new SaveToSdCardDialogFragment();
@@ -72,7 +80,6 @@ public class SaveToSdCardDialogFragment extends DialogFragment {
                 if (inputPath != "" && inputFile != "" && outputPath != "") {
                     moveFile(inputPath, inputFile, outputPath);
                     ((GalleryActivity2)getActivity()).onFileMoved(inputPath, inputFile, outputPath);
-
                 }
                 dismiss();
             }
@@ -91,6 +98,7 @@ public class SaveToSdCardDialogFragment extends DialogFragment {
 
         return view;
     }
+
 
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);

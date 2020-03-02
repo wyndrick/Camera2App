@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true"
-        android:drawable="@drawable/asset9_pressed" /> <!-- pressed -->
-    <item android:drawable="@drawable/asset9" /> <!-- default -->
+        android:drawable="@drawable/videocam_filled_tool_pressed" /> <!-- pressed -->
+    <item android:drawable="@drawable/videocam_filled_tool" /> <!-- default -->
 </selector>

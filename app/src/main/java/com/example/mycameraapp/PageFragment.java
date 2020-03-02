@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.MediaController;
+import android.widget.RelativeLayout;
 import android.widget.VideoView;
 
 import java.net.URLConnection;
@@ -37,7 +38,7 @@ public class PageFragment extends Fragment {
 
     private View v;
     public boolean isVideo = false;
-    private ImageView mPlayVideo;
+    private ImageView mPlayVideo, mPauseVideo, mBackVideo, mNextVideo;
 
     public PageFragment() {
         // Required empty public constructor
@@ -100,6 +101,9 @@ public class PageFragment extends Fragment {
         videoView =  view.findViewById(R.id.video_thumb);
         imageView = view.findViewById(R.id.image);
         mPlayVideo = view.findViewById(R.id.mPlayVideo);
+        mPauseVideo = view.findViewById(R.id.mPauseVideo);
+        mBackVideo = view.findViewById(R.id.mBackVideo);
+        mNextVideo = view.findViewById(R.id.mNextVideo);
 
         if (getArguments() != null) {
             imageResource = getArguments().getString("image_source");
@@ -110,6 +114,26 @@ public class PageFragment extends Fragment {
             public void onClick(View v) {
                 videoView.start();
                 mPlayVideo.setVisibility(View.GONE);
+            }
+        });
+
+        mPauseVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                videoView.pause();
+                mPlayVideo.setVisibility(View.VISIBLE);
+                mPauseVideo.setVisibility(View.GONE);
+                mBackVideo.setVisibility(View.GONE);
+                mNextVideo.setVisibility(View.GONE);
+            }
+        });
+
+        videoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPauseVideo.setVisibility(View.VISIBLE);
+                mBackVideo.setVisibility(View.VISIBLE);
+                mNextVideo.setVisibility(View.VISIBLE);
             }
         });
 
@@ -125,6 +149,8 @@ public class PageFragment extends Fragment {
             if (imageResource != null && !TextUtils.isEmpty(imageResource)) {
                 if (isVideoFile(imageResource)) {
                     isVideo = true;
+
+                    mPlayVideo.setVisibility(View.VISIBLE);
 
                     videoView.setVideoPath(imageResource);
 
@@ -151,6 +177,7 @@ public class PageFragment extends Fragment {
                     });
                     imageView.setVisibility(View.GONE);
                     videoView.setVisibility(View.VISIBLE);
+
                     setUserVisibleHint(mIsVisibleToUser);
                 } else {
                     isVideo = false;

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_gravity="center"
-    android:layout_height="fill_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context=".PageFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -14,17 +15,45 @@
         android:scaleType="centerCrop"/>
 
     <VideoView android:id="@+id/video_thumb"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center|center_vertical">
     </VideoView>
+
+    <ImageView
+        android:id="@+id/mPauseVideo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|center_vertical"
+        android:src="@drawable/rounded_pause_button"
+        android:visibility="gone" />
 
     <ImageView
         android:id="@+id/mPlayVideo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_vertical"
-        android:src="@drawable/ic_play_button"
+        android:src="@drawable/play_button_inside_a_circle"
         android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/mBackVideo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="70dp"
+        android:layout_marginBottom="25dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:src="@drawable/back"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/mNextVideo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="70dp"
+        android:layout_marginBottom="25dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:src="@drawable/next"
+        android:visibility="gone"/>
 
 </FrameLayout >
