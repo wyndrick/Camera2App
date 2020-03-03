@@ -38,12 +38,12 @@ public class AutoFillTextureView extends TextureView {
         if (mAspectRatio <= 0) {
             setMeasuredDimension(width, height);
         } else {
-            // preview size ratio is larger than 1.0f,
-            // mean the texture view height's width < height
+            // соотношение размеров предварительного просмотра больше, чем 1.0f,
+            // имеем в виду текстурную высоту width <height
             if (mAspectRatio < 1.0f) {
                 // need texture' s width < height
                 if (width > height) {
-                    // height can be match, width should be smaller than height
+                    // высота может совпадать, ширина должна быть меньше высоты
                     setMeasuredDimension((int) (height / mAspectRatio), height);
                 } else {
                     // width can be match, height should be larger than width

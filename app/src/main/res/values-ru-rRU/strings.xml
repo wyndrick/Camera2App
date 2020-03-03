@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">PebbleCam</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="permission_request">Этот образец требует разрешения для камеры и записи звука.</string>
+
+    <string name="dialog_sd_card_message">MOVE ALL MEDIA TO SD CARD?</string>
+    <string name="dialog_insert_sd_card_message">PLEASE INSERT SD CARD</string>
+    <string name="dialog_not_enough_memory">NOT ENOUGH MEMORY</string>
+    <string name="dialog_delete_file">DELETE THIS FILE?</string>
+
+    <string name="cant_upload_file">Не могу загрузить файл</string>
+    <string name="video_saved">Видео сохранено:</string>
+    <string name="file_delete">Файл удален:</string>
+    <string name="file_not_delete">Файл не удален:</string>
+    <string name="file_no_found">Файл не найден!</string>
+
+    <string name="request_permission">Это приложение требует разрешения камеры.</string>
+    <string name="camera_error">This device doesn\\\'t support Camera2 API.</string>
+</resources>
