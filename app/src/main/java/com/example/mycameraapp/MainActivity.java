@@ -1164,9 +1164,11 @@ public class MainActivity extends AppCompatActivity {
                         CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
                 mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
 
-                Size largest = Collections.max(
-                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
-                        new CompareSizesByArea());
+                Point displaySize = getDisplaySize();
+                Size largest = getOptimalPreviewSize(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), displaySize.x, displaySize.y);
+//                Size largest = Collections.max(
+//                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
+//                        new CompareSizesByArea());
 
                 mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(),
                         ImageFormat.JPEG, /*maxImages*/2);
@@ -1310,6 +1312,39 @@ public class MainActivity extends AppCompatActivity {
             values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
             values.put(MediaStore.Video.Media.DATA, videoFile.getAbsolutePath());
             return getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+        }
+
+        private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
+
+            final double ASPECT_TOLERANCE = 0.1;
+            double targetRatio=(double)h / w;
+
+            if (sizes == null) return null;
+
+            Size optimalSize = null;
+            double minDiff = Double.MAX_VALUE;
+
+            int targetHeight = h;
+
+            for (Size size : sizes) {
+                double ratio = (double) size.getWidth() / size.getHeight();
+                if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+                if (Math.abs(size.getHeight() - targetHeight) < minDiff) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.getHeight() - targetHeight);
+                }
+            }
+
+            if (optimalSize == null) {
+                minDiff = Double.MAX_VALUE;
+                for (Size size : sizes) {
+                    if (Math.abs(size.getHeight() - targetHeight) < minDiff) {
+                        optimalSize = size;
+                        minDiff = Math.abs(size.getHeight() - targetHeight);
+                    }
+                }
+            }
+            return optimalSize;
         }
 
         public void createCameraPreviewSession() {
