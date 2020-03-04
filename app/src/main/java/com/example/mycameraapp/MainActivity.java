@@ -987,7 +987,7 @@ public class MainActivity extends AppCompatActivity {
                 //setAutoFlash(captureBuilder);
 
                 if(fpsRange != null) {
-                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
+                    captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
                 }
                 // Используйте те же режимы AE и AF, что и при предварительном просмотре.
                 captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
