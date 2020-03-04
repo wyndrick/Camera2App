@@ -963,6 +963,9 @@ public class MainActivity extends AppCompatActivity {
 
         private void setUpCaptureRequestBuilder(CaptureRequest.Builder builder) {
             builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+            if(fpsRange != null) {
+                builder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
+            }
         }
 
         private void captureStillPicture() {
@@ -983,13 +986,13 @@ public class MainActivity extends AppCompatActivity {
 //                captureBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, (10000 - 100) / 2);
                 //setAutoFlash(captureBuilder);
 
+                if(fpsRange != null) {
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
+                }
                 // Используйте те же режимы AE и AF, что и при предварительном просмотре.
                 captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                 captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-//                captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
-                captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-                captureBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, 12);
-                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, new RggbChannelVector(86, 86, 86, 86));
+                captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
 
                 CameraCaptureSession.CaptureCallback CaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
@@ -1049,6 +1052,7 @@ public class MainActivity extends AppCompatActivity {
                 // Reset the auto-focus trigger
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                         CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+
                 setAutoFlash(mPreviewRequestBuilder);
                 mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                         mBackgroundHandler);
@@ -1075,6 +1079,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Choose the sizes for camera preview and video recording
                 CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(mCameraID);
+                initFPS(characteristics);
                 StreamConfigurationMap map = characteristics
                         .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
                 mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
@@ -1127,6 +1132,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         private void setUpCameraOutputs(int width, int height) {
+
 
             CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
             try {
@@ -1319,11 +1325,13 @@ public class MainActivity extends AppCompatActivity {
 
                 mPreviewRequestBuilder =
                         mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-                mPreviewRequestBuilder.addTarget(surface);
+
 
                 if(fpsRange != null) {
                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
                 }
+                mPreviewRequestBuilder.addTarget(surface);
+
 
 
                 // Enable auto-magical 3Auto run by camera device
@@ -1380,16 +1388,8 @@ public class MainActivity extends AppCompatActivity {
                                 try {
 
                                     // Auto focus should be continuous for camera preview.
-//                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-//                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, exposureCompensation);
-
-                                    // Используйте те же режимы AE и AF, что и при предварительном просмотре.
                                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-//                captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
-                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, 12);
-                                    mPreviewRequestBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, new RggbChannelVector(86, 86, 86, 86));
+                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, exposureCompensation);
                                     // Flash is automatically enabled when necessary.
                                     //setAutoFlash(mPreviewRequestBuilder);
 
