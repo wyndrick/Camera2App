@@ -257,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
             openCamera();
+            configureTransform(width, height);
         }
 
         @Override
@@ -1320,7 +1321,6 @@ public class MainActivity extends AppCompatActivity {
             double targetRatio=(double)h / w;
 
             if (sizes == null) return null;
-
             Size optimalSize = null;
             double minDiff = Double.MAX_VALUE;
 
