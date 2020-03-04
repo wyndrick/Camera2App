@@ -63,7 +63,7 @@
 
 <!--    </LinearLayout>-->
 
-    <com.example.mycameraapp.AutoFillTextureView
+    <com.example.mycameraapp.AutoFitTextureView
         android:id="@+id/textureView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

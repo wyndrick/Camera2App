@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mButtonSwitchCameraSession = null;
     private Boolean isPressed = false;
     private ImageButton mButtonToMakeShot = null;
-    private AutoFillTextureView mTextureView = null;
+    private AutoFitTextureView mTextureView = null;
     private HandlerThread mBackgroundThread;
     private Handler mBackgroundHandler = null;
     private ImageButton mButtonOpenGallery;
@@ -275,6 +275,13 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
+
+    private float getUIAspectRatio() {
+        Point displaySize = new Point();
+        getWindowManager().getDefaultDisplay().getSize(displaySize);
+        return (float)displaySize.x / displaySize.y;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -292,7 +299,6 @@ public class MainActivity extends AppCompatActivity {
         mTextureView = findViewById(R.id.textureView);
         mPlayVideo = findViewById(R.id.mPlayVideo);
         mTextViewTimer = findViewById(R.id.txt_timer);
-
         Log.d(LOG_TAG, "Запрашиваем разрешение");
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                 || checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
@@ -1094,9 +1100,9 @@ public class MainActivity extends AppCompatActivity {
 
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getWidth(), mPreviewSize.getHeight());
+                    mTextureView.setAspectRatio(mPreviewSize.getWidth(), mPreviewSize.getHeight());
                 } else {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getHeight(), mPreviewSize.getWidth());
+                    mTextureView.setAspectRatio(mPreviewSize.getHeight(), mPreviewSize.getWidth());
                 }
                 configureTransform(width, height);
                 mMediaRecorder = new MediaRecorder();
@@ -1178,14 +1184,14 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException("Cannot get available preview/video sizes");
                 }
                 mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                mPreviewSize = mVideoSize; //chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
+                mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
 
 
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getWidth(), mPreviewSize.getHeight());
+                    mTextureView.setAspectRatio(mPreviewSize.getWidth(), mPreviewSize.getHeight());
                 } else {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getHeight(), mPreviewSize.getWidth());
+                    mTextureView.setAspectRatio(mPreviewSize.getHeight(), mPreviewSize.getWidth());
                 }
 
                 // Проверьте, поддерживается ли вспышка.
@@ -1204,12 +1210,6 @@ public class MainActivity extends AppCompatActivity {
                 ErrorDialog.newInstance(getString(R.string.camera_error))
                         .show(getFragmentManager(), "dialog");
             }
-        }
-
-        private float getUIAspectRatio() {
-            Point displaySize = new Point();
-            getWindowManager().getDefaultDisplay().getSize(displaySize);
-            return (float)displaySize.x / displaySize.y;
         }
 
         public float setExposure(double exposureAdjustment, Range<Integer> range1) {
