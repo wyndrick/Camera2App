@@ -1090,8 +1090,7 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException("Cannot get available preview/video sizes");
                 }
                 mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class),
-                        width, height, mVideoSize);
+                mPreviewSize = mVideoSize; //chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
 
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -1179,8 +1178,7 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException("Cannot get available preview/video sizes");
                 }
                 mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class),
-                        width, height, mVideoSize);
+                mPreviewSize = mVideoSize; //chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
 
 
                 int orientation = getResources().getConfiguration().orientation;
