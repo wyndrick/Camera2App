@@ -210,9 +210,9 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         btnCam.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            Intent intent = new Intent(GalleryActivity2.this, MainActivity.class);
-            startActivity(intent);
-            finish();
+                Intent intent = new Intent(GalleryActivity2.this, MainActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
 

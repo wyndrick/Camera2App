@@ -98,7 +98,7 @@ public class PageFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_page, container, false);
         v = view;
-        videoView =  view.findViewById(R.id.video_thumb);
+        videoView = view.findViewById(R.id.video_thumb);
         imageView = view.findViewById(R.id.image);
         mPlayVideo = view.findViewById(R.id.mPlayVideo);
         mPauseVideo = view.findViewById(R.id.mPauseVideo);
