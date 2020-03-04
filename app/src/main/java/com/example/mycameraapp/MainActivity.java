@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mButtonSwitchCameraSession = null;
     private Boolean isPressed = false;
     private ImageButton mButtonToMakeShot = null;
-    private AutoFitTextureView mTextureView = null;
+    private AutoFillTextureView mTextureView = null;
     private HandlerThread mBackgroundThread;
     private Handler mBackgroundHandler = null;
     private ImageButton mButtonOpenGallery;
@@ -276,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
+
     private float getUIAspectRatio() {
         Point displaySize = new Point();
         getWindowManager().getDefaultDisplay().getSize(displaySize);
@@ -299,6 +300,7 @@ public class MainActivity extends AppCompatActivity {
         mTextureView = findViewById(R.id.textureView);
         mPlayVideo = findViewById(R.id.mPlayVideo);
         mTextViewTimer = findViewById(R.id.txt_timer);
+        mTextureView.setAspectRatio(getUIAspectRatio());
         Log.d(LOG_TAG, "Запрашиваем разрешение");
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                 || checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
@@ -1100,9 +1102,9 @@ public class MainActivity extends AppCompatActivity {
 
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getWidth(), mPreviewSize.getHeight());
                 } else {
-                    mTextureView.setAspectRatio(mPreviewSize.getHeight(), mPreviewSize.getWidth());
+                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getHeight(), mPreviewSize.getWidth());
                 }
                 configureTransform(width, height);
                 mMediaRecorder = new MediaRecorder();
@@ -1189,9 +1191,9 @@ public class MainActivity extends AppCompatActivity {
 
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getWidth(), mPreviewSize.getHeight());
                 } else {
-                    mTextureView.setAspectRatio(mPreviewSize.getHeight(), mPreviewSize.getWidth());
+                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getHeight(), mPreviewSize.getWidth());
                 }
 
                 // Проверьте, поддерживается ли вспышка.
