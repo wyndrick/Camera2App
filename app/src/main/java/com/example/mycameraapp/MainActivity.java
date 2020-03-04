@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
-            openCamera();
+            openCamera(width, height);
         }
 
         @Override
@@ -480,16 +480,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void openCamera() {
+    public void openCamera(int width, int height) {
         //start camera 1 (back)
         if (myCameras[CAMERA2].isOpen()) {myCameras[CAMERA2].closeCamera();}
         if (myCameras[CAMERA1] != null) {
             if (mCurrentSessionIsVideo) {
                 if (!myCameras[CAMERA1].isOpen())
-                    myCameras[CAMERA1].openVideoCamera(mTextureView.getWidth(), mTextureView.getHeight());
+                    myCameras[CAMERA1].openVideoCamera(width, height);
             } else {
                 if (!myCameras[CAMERA1].isOpen())
-                    myCameras[CAMERA1].openCamera(mTextureView.getWidth(), mTextureView.getHeight());
+                    myCameras[CAMERA1].openCamera(width, height);
             }
         }
         isPressed = true;
@@ -1542,7 +1542,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         if (mTextureView.isAvailable()) {
-            openCamera();
+            openCamera(mTextureView.getWidth(), mTextureView.getHeight());
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
