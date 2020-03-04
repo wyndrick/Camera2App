@@ -257,7 +257,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
             openCamera();
-            configureTransform(width, height);
         }
 
         @Override
@@ -546,8 +545,6 @@ public class MainActivity extends AppCompatActivity {
                 return size;
             }
         }
-
-
 
         Log.e(LOG_TAG, "Couldn't find any suitable video size");
         return choices[choices.length - 1];
@@ -1078,7 +1075,6 @@ public class MainActivity extends AppCompatActivity {
                 if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                     throw new RuntimeException("Time out waiting to lock camera opening.");
                 }
-
                 // Choose the sizes for camera preview and video recording
                 CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(mCameraID);
                 initFPS(characteristics);
@@ -1100,7 +1096,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getHeight(), mPreviewSize.getWidth());
                 }
-                configureTransform(width, height);
+                configureTransform(mVideoSize.getWidth(), mVideoSize.getHeight());
                 mMediaRecorder = new MediaRecorder();
                 mCameraManager.openCamera(mCameraID, mStateCallback, null);
             } catch (CameraAccessException e) {
@@ -1165,11 +1161,9 @@ public class MainActivity extends AppCompatActivity {
                         CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
                 mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
 
-                Point displaySize = getDisplaySize();
-                Size largest = getOptimalPreviewSize(Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)), displaySize.x, displaySize.y);
-//                Size largest = Collections.max(
-//                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
-//                        new CompareSizesByArea());
+                Size largest = Collections.max(
+                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
+                        new CompareSizesByArea());
 
                 mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(),
                         ImageFormat.JPEG, /*maxImages*/2);
@@ -1185,6 +1179,7 @@ public class MainActivity extends AppCompatActivity {
                 mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class),
                         width, height, mVideoSize);
 
+                configureTransform(mVideoSize.getWidth(), mVideoSize.getHeight());
 
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -1315,37 +1310,6 @@ public class MainActivity extends AppCompatActivity {
             return getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
         }
 
-        private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
-
-            final double ASPECT_TOLERANCE = 0.1;
-            double targetRatio=(double)h / w;
-
-            if (sizes == null) return null;
-            Size optimalSize = null;
-            double minDiff = Double.MAX_VALUE;
-
-            int targetHeight = h;
-
-            for (Size size : sizes) {
-                double ratio = (double) size.getWidth() / size.getHeight();
-                if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
-                if (Math.abs(size.getHeight() - targetHeight) < minDiff) {
-                    optimalSize = size;
-                    minDiff = Math.abs(size.getHeight() - targetHeight);
-                }
-            }
-
-            if (optimalSize == null) {
-                minDiff = Double.MAX_VALUE;
-                for (Size size : sizes) {
-                    if (Math.abs(size.getHeight() - targetHeight) < minDiff) {
-                        optimalSize = size;
-                        minDiff = Math.abs(size.getHeight() - targetHeight);
-                    }
-                }
-            }
-            return optimalSize;
-        }
 
         public void createCameraPreviewSession() {
             try {
@@ -1518,7 +1482,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             setUpCameraOutputs(width, height);
-            configureTransform(width, height);
+//            configureTransform(width, height);
 
             try {
 //                if (!mCameraOpenCloseLock.tryAcquire(3000, TimeUnit.MILLISECONDS)) {
