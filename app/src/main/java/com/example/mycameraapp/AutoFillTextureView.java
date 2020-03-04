@@ -35,31 +35,33 @@ public class AutoFillTextureView extends TextureView {
         setDimensionWithAspectRatio(width, height);
     }
     private void setDimensionWithAspectRatio(int width, int height) {
-        if (mAspectRatio <= 0) {
-            setMeasuredDimension(width, height);
-        } else {
-            // соотношение размеров предварительного просмотра больше, чем 1.0f,
-            // имеем в виду текстурную высоту width <height
-            if (mAspectRatio < 1.0f) {
-                // need texture' s width < height
-                if (width > height) {
-                    // высота может совпадать, ширина должна быть меньше высоты
-                    setMeasuredDimension((int) (height / mAspectRatio), height);
-                } else {
-                    // width can be match, height should be larger than width
-                    setMeasuredDimension(width, (int) (width * mAspectRatio));
-                }
-            } else {
-                // need texture' width > height
-                if (width > height) {
-                    // height can be match, width should be smaller than height
-                    setMeasuredDimension((int) (height * mAspectRatio), height);
-                } else {
-                    // width can be match, height should be larger than width
-                    setMeasuredDimension(width, (int) (width / mAspectRatio));
-                }
-            }
-        }
+
+        setMeasuredDimension(height, width);
+//        if (mAspectRatio <= 0) {
+//            setMeasuredDimension(width, height);
+//        } else {
+//            // соотношение размеров предварительного просмотра больше, чем 1.0f,
+//            // имеем в виду текстурную высоту width <height
+//            if (mAspectRatio < 1.0f) {
+//                // need texture' s width < height
+//                if (width > height) {
+//                    // высота может совпадать, ширина должна быть меньше высоты
+//                    setMeasuredDimension((int) (height / mAspectRatio), height);
+//                } else {
+//                    // width can be match, height should be larger than width
+//                    setMeasuredDimension(width, (int) (width * mAspectRatio));
+//                }
+//            } else {
+//                // need texture' width > height
+//                if (width > height) {
+//                    // height can be match, width should be smaller than height
+//                    setMeasuredDimension((int) (height * mAspectRatio), height);
+//                } else {
+//                    // width can be match, height should be larger than width
+//                    setMeasuredDimension(width, (int) (width / mAspectRatio));
+//                }
+//            }
+//        }
     }
 
 }
