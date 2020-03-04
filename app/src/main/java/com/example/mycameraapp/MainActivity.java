@@ -1,6 +1,7 @@
 package com.example.mycameraapp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -1133,7 +1134,6 @@ public class MainActivity extends AppCompatActivity {
 
         private void setUpCameraOutputs(int width, int height) {
 
-
             CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
             try {
                 // Получениe характеристик камеры
@@ -1421,17 +1421,43 @@ public class MainActivity extends AppCompatActivity {
 
         }
         public Range<Integer> fpsRange;
+
         private void initFPS(CameraCharacteristics cameraCharacteristics){
             try {
-                Range<Integer>[] ranges = cameraCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
-                if(ranges != null) {
-                    for (Range<Integer> range : ranges) {
-                        int upper = range.getUpper();
-                        Log.i("Camera", "[FPS Range Available] is:" + range);
-                        if (upper >= 10) {
-                            if (fpsRange == null || upper < fpsRange.getUpper()) {
-                                fpsRange = range;
-                            }
+                final int MIN_FPS_RANGE    = 0;
+                final int MAX_FPS_RANGE    = 30;
+
+                final Range<Integer>[] rangeList = cameraCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
+
+                if ((rangeList == null) || (rangeList.length == 0)) {
+                    Log.e("Camera", "Failed to get FPS ranges.");
+                }
+
+                Range<Integer> result = null;
+
+                for (final Range<Integer> entry : rangeList) {
+                    int candidateLower = entry.getLower();
+                    int candidateUpper = entry.getUpper();
+
+                    if (candidateUpper > 1000) {
+                        Log.w("Camera","Device uses FPS range in a 1000 scale. Normalizing.");
+                        candidateLower /= 1000;
+                        candidateUpper /= 1000;
+                    }
+
+                    // Discard candidates with equal or out of range bounds
+                    final boolean discard = (candidateLower == candidateUpper)
+                            || (candidateLower < MIN_FPS_RANGE)
+                            || (candidateUpper > MAX_FPS_RANGE);
+
+                    if (discard == false) {
+                        // Update if none resolved yet, or the candidate
+                        // has a >= upper bound and spread than the current result
+                        final boolean update = (result == null)
+                                || ((candidateUpper >= result.getUpper()) && ((candidateUpper - candidateLower) >= (result.getUpper() - result.getLower())));
+
+                        if (update == true) {
+                            fpsRange = Range.create(candidateLower, candidateUpper);
                         }
                     }
                 }
