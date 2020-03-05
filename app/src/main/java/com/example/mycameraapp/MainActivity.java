@@ -1187,15 +1187,15 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException("Cannot get available preview/video sizes");
                 }
                 mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                mPreviewSize = mVideoSize; // chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
+                mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
 
 
                 int orientation = getResources().getConfiguration().orientation;
 
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio((float)mPreviewSize.getWidth() / mPreviewSize.getHeight());
+                    mTextureView.setAspectRatio((float)mVideoSize.getWidth() / (float)mVideoSize.getHeight());
                 } else {
-                    mTextureView.setAspectRatio((float)mPreviewSize.getWidth() / mPreviewSize.getHeight());
+                    mTextureView.setAspectRatio((float)mVideoSize.getWidth() / (float)mVideoSize.getHeight());
                 }
 
                 // Проверьте, поддерживается ли вспышка.

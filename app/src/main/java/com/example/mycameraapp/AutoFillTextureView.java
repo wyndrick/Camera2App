@@ -43,20 +43,20 @@ public class AutoFillTextureView extends TextureView {
             if (mAspectRatio < 1.0f) {
                 // need texture' s width < height
                 if (width > height) {
-                    // высота может совпадать, ширина должна быть меньше высоты
-                    setMeasuredDimension((int) (height / mAspectRatio), height);
-                } else {
                     // width can be match, height should be larger than width
                     setMeasuredDimension(width, (int) (width * mAspectRatio));
+                } else {
+                    // высота может совпадать, ширина должна быть меньше высоты
+                    setMeasuredDimension((int) (height / mAspectRatio), height);
                 }
             } else {
                 // need texture' width > height
                 if (width > height) {
-                    // height can be match, width should be smaller than height
-                    setMeasuredDimension((int) (height * mAspectRatio), height);
-                } else {
                     // width can be match, height should be larger than width
                     setMeasuredDimension(width, (int) (width / mAspectRatio));
+                } else {
+                    // height can be match, width should be smaller than height
+                    setMeasuredDimension((int) (height * mAspectRatio), height);
                 }
             }
         }
