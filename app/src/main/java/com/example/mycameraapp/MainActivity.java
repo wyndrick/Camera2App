@@ -302,6 +302,7 @@ public class MainActivity extends AppCompatActivity {
         mTextViewTimer = findViewById(R.id.txt_timer);
         mTextureView.setAspectRatio(getUIAspectRatio());
         Log.d(LOG_TAG, "Запрашиваем разрешение");
+
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                 || checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
                 || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
@@ -557,7 +558,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         Log.e(LOG_TAG, "Couldn't find any suitable video size");
-        return choices[choices.length - 1];
+        return choices[0];
     }
 
 
@@ -1098,13 +1099,13 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException("Cannot get available preview/video sizes");
                 }
                 mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                mPreviewSize = mVideoSize; //chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
+                mPreviewSize = mVideoSize; // chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
 
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getWidth(), mPreviewSize.getHeight());
+                    mTextureView.setAspectRatio((float)mVideoSize.getWidth() / mPreviewSize.getHeight());
                 } else {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getHeight(), mPreviewSize.getWidth());
+                    mTextureView.setAspectRatio((float)mPreviewSize.getWidth() / mPreviewSize.getHeight());
                 }
                 configureTransform(width, height);
                 mMediaRecorder = new MediaRecorder();
@@ -1186,14 +1187,15 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException("Cannot get available preview/video sizes");
                 }
                 mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
+                mPreviewSize = mVideoSize; // chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class), width, height, mVideoSize);
 
 
                 int orientation = getResources().getConfiguration().orientation;
+
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getWidth(), mPreviewSize.getHeight());
+                    mTextureView.setAspectRatio((float)mPreviewSize.getWidth() / mPreviewSize.getHeight());
                 } else {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getHeight(), mPreviewSize.getWidth());
+                    mTextureView.setAspectRatio((float)mPreviewSize.getWidth() / mPreviewSize.getHeight());
                 }
 
                 // Проверьте, поддерживается ли вспышка.
@@ -1475,6 +1477,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         }
+
 
         public void openCamera(int width, int height) {
             if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
