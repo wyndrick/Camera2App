@@ -641,8 +641,11 @@ public class MainActivity extends AppCompatActivity {
                         Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
                         if (afState == null) {
                             captureStillPicture();
-                        } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
-                                CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
+                        } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState
+                                || CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState
+                                || CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED == afState
+                                || CaptureRequest.CONTROL_AF_STATE_PASSIVE_FOCUSED == afState
+                                || CaptureRequest.CONTROL_AF_STATE_INACTIVE == afState) {
                             // CONTROL_AE_STATE can be null on some devices
                             Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
                             if (aeState == null ||
@@ -1103,24 +1106,22 @@ public class MainActivity extends AppCompatActivity {
 
         public void setupCameraPreview(int width, int height, StreamConfigurationMap map) {
             mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-            mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class),
-                    width, height, mVideoSize);
+            mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class),  width, height, mVideoSize);
 
             int orientation = getResources().getConfiguration().orientation;
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 if (mVideoSize.getWidth() == 176) {
-                    mTextureView.setAspectRatio((float)176 / 144);
+                    mTextureView.setAspectRatio((float)176 / (float)144);
                 } else {
                     mTextureView.setAspectRatio(getUIAspectRatio());
                 }
             } else {
                 if (mVideoSize.getWidth() == 176) {
-                    mTextureView.setAspectRatio((float)144 / 176);
+                    mTextureView.setAspectRatio((float)144 / (float)176);
                 } else {
                     mTextureView.setAspectRatio(getUIAspectRatio());
                 }
-                mTextureView.setAspectRatio(mPreviewSize.getHeight() / mPreviewSize.getWidth());
             }
         }
 
