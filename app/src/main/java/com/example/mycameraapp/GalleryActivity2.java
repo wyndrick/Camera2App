@@ -67,6 +67,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     private ImageView btnNext, btnPrev, btnDel, btnCam, btnCard, btnMakeShot, btnCardProblem;
     private ViewPagerAdapter adapter;
 
+    NotEnoughMemoryDialogFragment notEnoughMemoryDialogFragment;
     SaveToSdCardDialogFragment saveToSdCardDialog;
     DelFileDialogFragment delFileDialog;
 
@@ -317,7 +318,8 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
                 });
                 t.start();
             } else {
-                showToast(String.format(getString(R.string.files_not_enough_space), totalSize / 1024 / 1024 + 1 , freeSpace / 1024 / 1024));
+                mNotEnoguhMemory = true;
+//                showToast(String.format(getString(R.string.files_not_enough_space), totalSize / 1024 / 1024 + 1 , freeSpace / 1024 / 1024));
             }
         }
     }
@@ -703,11 +705,17 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         }
         super.onPause();
     }
-
+    boolean mNotEnoguhMemory = false
     @Override
     public void onResume() {
         super.onResume();
+// play with fragments here
+        if (mNotEnoguhMemory) {
+            mNotEnoguhMemory = false;
 
+            notEnoughMemoryDialogFragment = NotEnoughMemoryDialogFragment.getInstance();
+            notEnoughMemoryDialogFragment.show(getSupportFragmentManager(), "dialog_not_enough_memory");
+        }
         registerReceiver(this);
     }
 
