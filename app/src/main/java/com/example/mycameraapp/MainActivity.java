@@ -546,8 +546,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
-
         Log.e(LOG_TAG, "Couldn't find any suitable video size");
         return choices[choices.length - 1];
     }
@@ -1089,16 +1087,8 @@ public class MainActivity extends AppCompatActivity {
                 if (map == null) {
                     throw new RuntimeException("Cannot get available preview/video sizes");
                 }
-                mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class),
-                        width, height, mVideoSize);
 
-                int orientation = getResources().getConfiguration().orientation;
-                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getWidth(), mPreviewSize.getHeight());
-                } else {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getHeight(), mPreviewSize.getWidth());
-                }
+                setupCameraPreview(width, height, map);
                 configureTransform(width, height);
                 mMediaRecorder = new MediaRecorder();
                 mCameraManager.openCamera(mCameraID, mStateCallback, null);
@@ -1110,6 +1100,30 @@ public class MainActivity extends AppCompatActivity {
                 throw new RuntimeException("Interrupted while trying to lock camera opening.");
             }
         }
+
+        public void setupCameraPreview(int width, int height, StreamConfigurationMap map) {
+            mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
+            mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class),
+                    width, height, mVideoSize);
+
+            int orientation = getResources().getConfiguration().orientation;
+
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if (mVideoSize.getWidth() == 176) {
+                    mTextureView.setAspectRatio((float)176 / 144);
+                } else {
+                    mTextureView.setAspectRatio(getUIAspectRatio());
+                }
+            } else {
+                if (mVideoSize.getWidth() == 176) {
+                    mTextureView.setAspectRatio((float)144 / 176);
+                } else {
+                    mTextureView.setAspectRatio(getUIAspectRatio());
+                }
+                mTextureView.setAspectRatio(mPreviewSize.getHeight() / mPreviewSize.getWidth());
+            }
+        }
+
         private Size chooseOptimalVideoSize(Size[] choices, int width, int height, Size aspectRatio) {
             // Collect the supported resolutions that are at least as big as the preview Surface
             List<Size> bigEnough = new ArrayList<>();
@@ -1173,22 +1187,13 @@ public class MainActivity extends AppCompatActivity {
                 mImageReader.setOnImageAvailableListener(
                         mOnImageAvailableListener, mBackgroundHandler);
 
-                int displayRotation = getWindowManager().getDefaultDisplay().getRotation();
+
 
                 if (map == null) {
                     throw new RuntimeException("Cannot get available preview/video sizes");
                 }
-                mVideoSize = chooseVideoSize(map.getOutputSizes(MediaRecorder.class));
-                mPreviewSize = chooseOptimalVideoSize(map.getOutputSizes(SurfaceTexture.class),
-                        width, height, mVideoSize);
 
-
-                int orientation = getResources().getConfiguration().orientation;
-                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getWidth(), mPreviewSize.getHeight());
-                } else {
-                    mTextureView.setAspectRatio(getUIAspectRatio());//mPreviewSize.getHeight(), mPreviewSize.getWidth());
-                }
+                setupCameraPreview(width, height, map);
 
                 // Проверьте, поддерживается ли вспышка.
                 Boolean available = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
@@ -1210,7 +1215,7 @@ public class MainActivity extends AppCompatActivity {
 
         private float getUIAspectRatio() {
             Point displaySize = new Point();
-            getWindowManager().getDefaultDisplay().getSize(displaySize);
+            getWindowManager().getDefaultDisplay().getRealSize(displaySize);
             return (float)displaySize.x / displaySize.y;
         }
 
