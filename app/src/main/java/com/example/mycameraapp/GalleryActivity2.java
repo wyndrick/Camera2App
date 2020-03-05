@@ -258,64 +258,66 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
                 moveFilesHandler = new Handler();
                 Thread t = new Thread(new Runnable() {
                     public void run() {
-                        try {
-                            for (int i = 0; i < images.size(); i++) {
-                                //                int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
+                    try {
+                        for (int i = 0; i < images.size(); i++) {
+                            //                int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
 
-                                //                    Map<String, File> externalLocations = ExternalStorage.getAllStorageLocations();
-                                //                    File sdCard = externalLocations.get(ExternalStorage.SD_CARD);
-                                //                    File externalSdCard = externalLocations.get(ExternalStorage.EXTERNAL_SD_CARD);
-                                //
-                                //                    for (Map.Entry<String, File> entry : externalLocations.entrySet()) {
-                                //                        Log.i(LOG_TAG, "entry = " + entry.getKey() + " val = " + entry.getValue().getAbsolutePath());
-                                //                    }
-                                //                    Log.i(LOG_TAG, "sdCard = " + sdCard);
-                                //                    Log.i(LOG_TAG, "externalSdCard = " + externalSdCard);
-                                //
-                                //String outputPath = sdCard + "/DCIM";
+                            //                    Map<String, File> externalLocations = ExternalStorage.getAllStorageLocations();
+                            //                    File sdCard = externalLocations.get(ExternalStorage.SD_CARD);
+                            //                    File externalSdCard = externalLocations.get(ExternalStorage.EXTERNAL_SD_CARD);
+                            //
+                            //                    for (Map.Entry<String, File> entry : externalLocations.entrySet()) {
+                            //                        Log.i(LOG_TAG, "entry = " + entry.getKey() + " val = " + entry.getValue().getAbsolutePath());
+                            //                    }
+                            //                    Log.i(LOG_TAG, "sdCard = " + sdCard);
+                            //                    Log.i(LOG_TAG, "externalSdCard = " + externalSdCard);
+                            //
+                            //String outputPath = sdCard + "/DCIM";
 
-                                //String outputPath = Environment.getExternalStorageState()+ "/DCIM";
-                                //String outputPath = Environment.getExternalStorageDirectory() + "/SDCamera";
+                            //String outputPath = Environment.getExternalStorageState()+ "/DCIM";
+                            //String outputPath = Environment.getExternalStorageDirectory() + "/SDCamera";
 
-                                String outputPath = "/PebbleGear";//uriString; //removableStoragePath + "/DCIM/Camera";
+                            String outputPath = "/PebbleGear";//uriString; //removableStoragePath + "/DCIM/Camera";
 
-                                String filepath = images.get(i);
-                                File f = new File(filepath);
-                                String filename = f.getName();
-                                String inputPath = f.getParentFile().getAbsolutePath();
-                                Log.i(LOG_TAG, "filepath = " + filepath);
-                                Log.i(LOG_TAG, "filename = " + filename);
-                                Log.i(LOG_TAG, "inputFolder = " + inputPath);
-                                Log.i(LOG_TAG, "outputPath = " + outputPath);
+                            String filepath = images.get(i);
+                            File f = new File(filepath);
+                            String filename = f.getName();
+                            String inputPath = f.getParentFile().getAbsolutePath();
+                            Log.i(LOG_TAG, "filepath = " + filepath);
+                            Log.i(LOG_TAG, "filename = " + filename);
+                            Log.i(LOG_TAG, "inputFolder = " + inputPath);
+                            Log.i(LOG_TAG, "outputPath = " + outputPath);
 
-                                if (moveFile(inputPath, filename, outputPath, pickedDir)) {
+                            if (moveFile(inputPath, filename, outputPath, pickedDir)) {
 //                                    onFileMoved(i);
-                                }
-
-                                imageMovedCount = i + 1;
-                                TimeUnit.MILLISECONDS.sleep(20);
-                                moveFilesHandler.post(updateProgress);
                             }
-                            progressDialog.dismiss();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            progressDialog.dismiss();
 
+                            imageMovedCount = i + 1;
+                            TimeUnit.MILLISECONDS.sleep(20);
+                            moveFilesHandler.post(updateProgress);
                         }
+                        progressDialog.dismiss();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        progressDialog.dismiss();
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                images.clear();
-                                adapter.notifyDataSetChanged();
-                                viewPager.setAdapter(adapter);
-                                updateButtons(0);
-                                showToast(getString(R.string.files_moved));
-                            }
-                        });
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            images.clear();
+                            adapter.notifyDataSetChanged();
+                            viewPager.setAdapter(adapter);
+                            updateButtons(0);
+                            showToast(getString(R.string.files_moved));
+                        }
+                    });
                     }
                 });
                 t.start();
+            } else {
+                showToast(String.format(getString(R.string.files_not_enough_space), totalSize / 1024 / 1024 + 1 , freeSpace / 1024 / 1024));
             }
         }
     }
@@ -696,7 +698,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
     @Override
     public void onPause() {
-        if(receiver != null && act != null) {
+        if(receiver != null) {
             this.unregisterReceiver(receiver);
         }
         super.onPause();
