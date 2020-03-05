@@ -1112,7 +1112,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 if (mVideoSize.getWidth() == 176) {
-                    mTextureView.setAspectRatio((float)176 / (float)144);
+                    mTextureView.setAspectRatio((float)144 / (float)176);
                 } else {
                     mTextureView.setAspectRatio(getUIAspectRatio());
                 }
