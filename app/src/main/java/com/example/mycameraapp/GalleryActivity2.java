@@ -77,6 +77,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     private boolean isAccessWriteSD;
     private SDCardInsertionReceiver receiver;
     private Context act;
+    boolean mNotEnoguhMemory = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -705,7 +706,6 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         }
         super.onPause();
     }
-    boolean mNotEnoguhMemory = false
     @Override
     public void onResume() {
         super.onResume();
