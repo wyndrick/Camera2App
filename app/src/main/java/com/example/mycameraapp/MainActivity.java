@@ -533,6 +533,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Size chooseVideoSize(Size[] choices) {
         Point displaySize = getDisplaySize();
+//        return new Size(176, 144);
 
         for (Size size : choices) {
             if ((1920 == size.getWidth() && 1080 == size.getHeight())) {
@@ -546,8 +547,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        Size min = Collections.max(
+                Arrays.asList(choices),
+                new CompareSizesByArea());
         Log.e(LOG_TAG, "Couldn't find any suitable video size");
-        return choices[choices.length - 1];
+        return min;
     }
 
 
@@ -1092,6 +1096,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 setupCameraPreview(width, height, map);
+
                 configureTransform(width, height);
                 mMediaRecorder = new MediaRecorder();
                 mCameraManager.openCamera(mCameraID, mStateCallback, null);
@@ -1112,7 +1117,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 if (mVideoSize.getWidth() == 176) {
-                    mTextureView.setAspectRatio((float)144 / (float)176);
+                    mTextureView.setAspectRatio((float)176 / (float)144);
                 } else {
                     mTextureView.setAspectRatio(getUIAspectRatio());
                 }
