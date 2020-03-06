@@ -774,7 +774,7 @@ public class MainActivity extends AppCompatActivity {
             mMediaRecorder.setMaxFileSize(500000000);
             mMediaRecorder.setVideoEncodingBitRate(10000000);
             mMediaRecorder.setVideoFrameRate(30);
-            mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
+            mMediaRecorder.setVideoSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
@@ -1118,7 +1118,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 if (mVideoSize.getWidth() == 176) {
-                    mTextureView.setAspectRatio((float)176 / (float)144);
+                    mTextureView.setAspectRatio((float)5 / (float)4);
                 } else {
                     mTextureView.setAspectRatio(getUIAspectRatio());
                 }
