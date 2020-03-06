@@ -34,9 +34,9 @@ package com.example.mycameraapp;
         import java.io.InputStream;
         import java.io.OutputStream;
 
-public class NotEnoughMemoryDialogFragment extends DialogFragment {
+public class InsertSDCardDialogFragment extends DialogFragment {
 
-    public static String TAG = "NotEnoughMemoryDialogFragment";
+    public static String TAG = "InsertSDCardDialogFragment";
 
     ImageView buttonYes;
     ImageView buttonNo;
@@ -48,8 +48,8 @@ public class NotEnoughMemoryDialogFragment extends DialogFragment {
     // Уникальный код запроса на конкретное разрешение private
     private static int REQUEST_EXTERNAL_STORAGE = 1;
 
-    public static NotEnoughMemoryDialogFragment getInstance() {
-        NotEnoughMemoryDialogFragment f = new NotEnoughMemoryDialogFragment();
+    public static InsertSDCardDialogFragment getInstance() {
+        InsertSDCardDialogFragment f = new InsertSDCardDialogFragment();
         Bundle args = new Bundle();
 
         f.setArguments(args);
@@ -60,14 +60,14 @@ public class NotEnoughMemoryDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.dialog_not_enough_memory, null);
+        View view = inflater.inflate(R.layout.dialog_insert_sd, null);
 
         buttonNo = view.findViewById(R.id.btn_no);
 
         buttonNo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().getSupportFragmentManager().beginTransaction().remove(NotEnoughMemoryDialogFragment.this).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().remove(InsertSDCardDialogFragment.this).commit();
             }
         });
 

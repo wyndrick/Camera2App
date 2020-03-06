@@ -26,9 +26,11 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -67,6 +69,7 @@ import android.util.Range;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -129,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTextViewTimer;
     private int mCurrentPeriod = 0;
     private Timer myTimer;
+
+
 
     private SoundPool mSoundPool;
     private AssetManager mAssetManager;
@@ -293,6 +298,13 @@ public class MainActivity extends AppCompatActivity {
         mPlayVideo = findViewById(R.id.mPlayVideo);
         mTextViewTimer = findViewById(R.id.txt_timer);
 
+        OnClickAnimTouchListener clickAnim = new OnClickAnimTouchListener();
+
+        mButtonOpenCamera1.setOnTouchListener(clickAnim);
+        mButtonSwitchCameraSession.setOnTouchListener(clickAnim);
+        mButtonToMakeShot.setOnTouchListener(clickAnim);
+        mButtonOpenGallery.setOnTouchListener(clickAnim);
+
         Log.d(LOG_TAG, "Запрашиваем разрешение");
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                 || checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
@@ -316,6 +328,7 @@ public class MainActivity extends AppCompatActivity {
         mButtonSwitchCameraSession.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+
                 for (CameraService camera : myCameras) {
                     if (camera != null) {
                         if (camera.isOpen()) {
@@ -336,7 +349,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     mButtonSwitchCameraSession.setImageResource(R.drawable.asset9_press);
-                    mButtonToMakeShot.setImageResource(R.drawable.asset12_press);
+                    mButtonToMakeShot.setImageResource(R.drawable.ic_camera_diaphragm);
+                    mButtonToMakeShot.setColorFilter(Color.argb(255, 255, 255, 255));
                     mCurrentSessionIsVideo = false;
                 }
                 else {
@@ -350,7 +364,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     mButtonSwitchCameraSession.setImageResource(R.drawable.asset14_press);
-                    mButtonToMakeShot.setImageResource(R.drawable.asset1212);
+                    mButtonToMakeShot.setImageResource(R.drawable.ic_video_record_start);
+                    mButtonToMakeShot.setColorFilter(Color.argb(255, 255, 0, 0));
                     mCurrentSessionIsVideo = true;
                 }
 
@@ -718,7 +733,8 @@ public class MainActivity extends AppCompatActivity {
         public void makeVideo() {
             if (mIsRecordingVideo) {
                 stopRecordingVideo();
-                mButtonToMakeShot.setImageResource(R.drawable.asset1212);
+                mButtonToMakeShot.setImageResource(R.drawable.ic_video_record_start);
+                mButtonToMakeShot.setColorFilter(Color.argb(255, 255, 0, 0));
                 //stop timer
                 mCurrentPeriod = 0;
                 if (myTimer != null) {
@@ -729,7 +745,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else {
                 startRecordingVideo();
-                mButtonToMakeShot.setImageResource(R.drawable.asset1213);
+                mButtonToMakeShot.setImageResource(R.drawable.ic_video_record_stop);
+                mButtonToMakeShot.setColorFilter(Color.argb(255, 255, 0, 0));
 
                 //start timer
                 mTextViewTimer.setVisibility(View.VISIBLE);

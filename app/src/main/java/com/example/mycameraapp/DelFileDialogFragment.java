@@ -56,6 +56,12 @@ public class DelFileDialogFragment extends DialogFragment {
 
         buttonYes = view.findViewById(R.id.btn_yes);
         buttonNo = view.findViewById(R.id.btn_no);
+        OnClickAnimTouchListener clickAnim = new OnClickAnimTouchListener();
+        clickAnim.scaleX = 0.9f;
+        clickAnim.scaleY = 0.9f;
+
+        buttonYes.setOnTouchListener(clickAnim);
+        buttonNo.setOnTouchListener(clickAnim);
         buttonYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

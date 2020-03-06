@@ -79,6 +79,12 @@ public class SaveToSdCardDialogFragment extends DialogFragment {
                 getActivity().getSupportFragmentManager().beginTransaction().remove(SaveToSdCardDialogFragment.this).commit();
             }
         });
+        OnClickAnimTouchListener clickAnim = new OnClickAnimTouchListener();
+        clickAnim.scaleX = 0.9f;
+        clickAnim.scaleY = 0.9f;
+
+        buttonYes.setOnTouchListener(clickAnim);
+        buttonNo.setOnTouchListener(clickAnim);
 
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
         getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));

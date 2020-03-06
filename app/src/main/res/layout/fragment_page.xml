@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_gravity="center"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="#000000"
     tools:context=".PageFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -12,48 +12,57 @@
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop" />
 
-    <VideoView android:id="@+id/video_thumb"
+    <VideoView
+        android:id="@+id/video_thumb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center|center_vertical">
-    </VideoView>
+        android:layout_gravity="center|center_vertical"></VideoView>
 
-    <ImageView
+    <ImageButton
         android:id="@+id/mPauseVideo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="92dp"
+        android:layout_height="92dp"
         android:layout_gravity="center|center_vertical"
-        android:src="@drawable/rounded_pause_button"
-        android:visibility="gone" />
+        android:background="@null"
+        android:scaleType="fitCenter"
+        android:tint="@color/white"
+        android:src="@drawable/ic_rounded_pause_button" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/mPlayVideo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="92dp"
+        android:layout_height="92dp"
         android:layout_gravity="center|center_vertical"
-        android:src="@drawable/play_button_inside_a_circle"
-        android:visibility="gone" />
+        android:background="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_play_button_inside_a_circle"
+        android:tint="@color/white" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/mBackVideo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center_horizontal|bottom"
         android:layout_marginRight="70dp"
-        android:layout_marginBottom="25dp"
-        android:layout_gravity="center_horizontal|bottom"
-        android:src="@drawable/back"
-        android:visibility="gone"/>
+        android:layout_marginBottom="33dp"
+        android:background="@null"
+        android:scaleType="fitCenter"
+        android:scaleX="-1"
+        android:src="@drawable/ic_next"
+        android:tint="@color/white" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/mNextVideo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="70dp"
-        android:layout_marginBottom="25dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_gravity="center_horizontal|bottom"
-        android:src="@drawable/next"
-        android:visibility="gone"/>
+        android:layout_marginLeft="70dp"
+        android:layout_marginBottom="33dp"
+        android:background="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_next"
+        android:tint="@color/white" />
 
 </FrameLayout >

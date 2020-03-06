@@ -10,20 +10,26 @@
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:backgroundTint="#000000">
 
     </androidx.viewpager.widget.ViewPager>
 
     <ImageButton
         android:id="@+id/open_camera"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
         android:background="@null"
-        android:layout_margin="30dp"
+        android:src="@drawable/ic_camera"
         android:text="Right Top"
-        android:src="@drawable/asset14_press"/>
+        android:tint="@color/white" />
 
 <!--    <ImageButton-->
 <!--        android:id="@+id/make_shot"-->
@@ -38,55 +44,72 @@
 
     <ImageButton
         android:id="@+id/del_photo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
         android:background="@null"
-        android:layout_margin="30dp"
-        android:src="@drawable/asset5_press"/>
+        android:src="@drawable/ic_bin"
+        android:tint="@color/white" />
 
     <ImageButton
         android:id="@+id/save_sd"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:text="Right Bottom"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
         android:background="@null"
-        android:layout_margin="30dp"
-        android:src="@drawable/asset8_press"/>
+        android:src="@drawable/ic_sd_card"
+        android:tint="@color/white" />
 
-    <ImageButton
-        android:id="@+id/save_sd_problem"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:text="Right Bottom"
-        android:background="@null"
-        android:layout_margin="30dp"
-        android:visibility="gone"
-        android:src="@drawable/asset1_press"/>
 
     <ImageButton
         android:id="@+id/btn_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentStart="true"
+        android:layout_centerInParent="true"
         android:layout_marginLeft="30dp"
         android:background="@null"
-        android:src="@drawable/asset6_press" />
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_left_chevron"
+        android:tint="@color/white" />
 
     <ImageButton
         android:id="@+id/btn_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true"
         android:layout_marginRight="30dp"
         android:background="@null"
-        android:src="@drawable/asset66_press" />
+        android:scaleType="fitCenter"
+        android:scaleX="-1"
+        android:src="@drawable/ic_left_chevron"
+        android:tint="@color/white" />
+
+    <ImageButton
+        android:id="@+id/save_sd_problem"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
+        android:background="@null"
+        android:src="@drawable/ic_sd_card_problem"
+        android:tint="@color/white" />
 
 </RelativeLayout>

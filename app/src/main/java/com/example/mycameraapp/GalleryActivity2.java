@@ -35,6 +35,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -64,11 +65,12 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     private ArrayList<String> imagesPath;
     private BitmapFactory.Options options;
     private ViewPager viewPager;
-    private ImageView btnNext, btnPrev, btnDel, btnCam, btnCard, btnMakeShot, btnCardProblem;
+    private ImageButton btnNext, btnPrev, btnDel, btnCam, btnCard, btnMakeShot, btnCardProblem;
     private ViewPagerAdapter adapter;
 
     NotEnoughMemoryDialogFragment notEnoughMemoryDialogFragment;
     SaveToSdCardDialogFragment saveToSdCardDialog;
+    InsertSDCardDialogFragment insertSDCardDialog;
     DelFileDialogFragment delFileDialog;
 
     public static final String LOG_TAG = "myLogs";
@@ -79,6 +81,9 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     private Context act;
     boolean mNotEnoguhMemory = false;
 
+    private boolean mIsSDCardInserted = false;
+    private boolean mIsEnoughSpace = false;
+    private long freeSpace = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,25 +96,57 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         imagesPath = new ArrayList<>();
 
         //find view by id
-        viewPager = (ViewPager) findViewById(R.id.view_pager);
-        btnNext = (ImageView)findViewById(R.id.btn_right);
-        btnPrev = (ImageView)findViewById(R.id.btn_left);
+        viewPager = findViewById(R.id.view_pager);
+        btnNext = findViewById(R.id.btn_right);
+        btnPrev = findViewById(R.id.btn_left);
 
-        btnDel = (ImageView)findViewById(R.id.del_photo);
-        btnCam = (ImageView)findViewById(R.id.open_camera);
+        btnDel = findViewById(R.id.del_photo);
+        btnCam = findViewById(R.id.open_camera);
         //btnMakeShot = (ImageView)findViewById(R.id.make_shot);
-        btnCard = (ImageView)findViewById(R.id.save_sd);
-        btnCardProblem = (ImageView)findViewById(R.id.save_sd_problem);
+        btnCard = findViewById(R.id.save_sd);
+        btnCardProblem = findViewById(R.id.save_sd_problem);
 
         btnPrev.setOnClickListener(onClickListener(0));
         btnNext.setOnClickListener(onClickListener(1));
 
         btnPrev.setVisibility(View.INVISIBLE);
 
+        OnClickAnimTouchListener clickAnim = new OnClickAnimTouchListener();
+
+        btnPrev.setOnTouchListener(clickAnim);
+        btnCardProblem.setOnTouchListener(clickAnim);
+        btnCard.setOnTouchListener(clickAnim);
+        btnDel.setOnTouchListener(clickAnim);
+        btnCam.setOnTouchListener(clickAnim);
+
+        OnClickAnimTouchListener clickAnim2 = new OnClickAnimTouchListener();
+        clickAnim2.scaleX = -0.8f;
+        clickAnim2.scaleXDefault = -1f;
+        btnNext.setOnTouchListener(clickAnim2);
+
+        mIsEnoughSpace = true;
+
+        File fileList[] = new File("/storage/").listFiles();
+        for (File file : fileList) {
+            String name = file.getName();
+            if (file.isDirectory() && !name.equals("emulated") && !name.equals("self")) {
+                mIsSDCardInserted = true;
+                long freeSpace = file.getFreeSpace();
+                long spaceRequired = getImagesTotalLength(images);
+                if (freeSpace < spaceRequired) {
+                    mIsEnoughSpace = false;
+                }
+            }
+        }
 
 
-
-//        File fileList[] = new File("/storage/").listFiles();
+        if (mIsSDCardInserted && mIsEnoughSpace) {
+            btnCard.setVisibility(View.VISIBLE);
+            btnCardProblem.setVisibility(View.GONE);
+        } else {
+            btnCardProblem.setVisibility(View.VISIBLE);
+            btnCard.setVisibility(View.GONE);
+        }
 //        for (File file : fileList)
 //        {     if(!file.getAbsolutePath().equalsIgnoreCase(Environment.getExternalStorageDirectory().getAbsolutePath()) && file.isDirectory() && file.canRead())
 //            removableStoragePath = file.getAbsolutePath();
@@ -157,6 +194,19 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
             removableStoragePath = getSDcardPath() + "/PebbleGear" ;
         }
 
+        btnCardProblem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsSDCardInserted) {
+                    insertSDCardDialog = InsertSDCardDialogFragment.getInstance();
+                    insertSDCardDialog.show(getSupportFragmentManager(), "dialog_insert_sd_card");
+                } else {
+                    notEnoughMemoryDialogFragment = NotEnoughMemoryDialogFragment.getInstance();
+                    notEnoughMemoryDialogFragment.show(getSupportFragmentManager(), "dialog_not_enough_memory");
+                }
+
+            }
+        });
         btnCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

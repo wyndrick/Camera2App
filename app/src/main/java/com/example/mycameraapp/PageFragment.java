@@ -105,6 +105,17 @@ public class PageFragment extends Fragment {
         mBackVideo = view.findViewById(R.id.mBackVideo);
         mNextVideo = view.findViewById(R.id.mNextVideo);
 
+        OnClickAnimTouchListener clickAnim = new OnClickAnimTouchListener();
+
+        mPlayVideo.setOnTouchListener(clickAnim);
+        mPauseVideo.setOnTouchListener(clickAnim);
+        mNextVideo.setOnTouchListener(clickAnim);
+
+        OnClickAnimTouchListener clickAnim2 = new OnClickAnimTouchListener();
+        clickAnim2.scaleX = -0.8f;
+        clickAnim2.scaleXDefault = -1f;
+        mBackVideo.setOnTouchListener(clickAnim2);
+
         if (getArguments() != null) {
             imageResource = getArguments().getString("image_source");
         }
@@ -127,13 +138,37 @@ public class PageFragment extends Fragment {
                 mNextVideo.setVisibility(View.GONE);
             }
         });
-
+        mNextVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int seekTime = Math.min(videoView.getCurrentPosition() + 5000, videoView.getDuration());
+                videoView.seekTo(seekTime);
+                if (!videoView.isPlaying()) {
+                    videoView.resume();
+                }
+            }
+        });
+        mBackVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int seekTime = Math.max(videoView.getCurrentPosition() - 1000, 0);
+                boolean isVideoPlaying = videoView.isPlaying();
+                if (isVideoPlaying) {
+                    videoView.seekTo(seekTime);
+                } else {
+                    videoView.seekTo(seekTime);
+                    videoView.start();
+                }
+            }
+        });
         videoView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPauseVideo.setVisibility(View.VISIBLE);
-                mBackVideo.setVisibility(View.VISIBLE);
-                mNextVideo.setVisibility(View.VISIBLE);
+                if (mPlayVideo.getVisibility() != View.VISIBLE) {
+                    mPauseVideo.setVisibility(View.VISIBLE);
+                    mBackVideo.setVisibility(View.VISIBLE);
+                    mNextVideo.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -150,10 +185,9 @@ public class PageFragment extends Fragment {
                 if (isVideoFile(imageResource)) {
                     isVideo = true;
 
-                    mPlayVideo.setVisibility(View.VISIBLE);
 
                     videoView.setVideoPath(imageResource);
-
+                    videoView.seekTo(1);
                     videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                         @Override
                         public void onPrepared(MediaPlayer mp) {
@@ -178,11 +212,22 @@ public class PageFragment extends Fragment {
                     imageView.setVisibility(View.GONE);
                     videoView.setVisibility(View.VISIBLE);
 
+                    mPlayVideo.setVisibility(View.VISIBLE);
+                    mPauseVideo.setVisibility(View.GONE);
+                    mBackVideo.setVisibility(View.GONE);
+                    mNextVideo.setVisibility(View.GONE);
+
                     setUserVisibleHint(mIsVisibleToUser);
                 } else {
                     isVideo = false;
                     imageView.setVisibility(View.VISIBLE);
                     videoView.setVisibility(View.GONE);
+
+                    mPlayVideo.setVisibility(View.GONE);
+                    mPauseVideo.setVisibility(View.GONE);
+                    mBackVideo.setVisibility(View.GONE);
+                    mNextVideo.setVisibility(View.GONE);
+
                     imageView.setImageURI(Uri.parse("file://"+ imageResource));
 
                 }
@@ -205,6 +250,9 @@ public class PageFragment extends Fragment {
             if (isVideo) {
                 if (isVisibleToUser && videoView != null) {
                     mPlayVideo.setVisibility(View.VISIBLE);
+                    mPauseVideo.setVisibility(View.GONE);
+                    mBackVideo.setVisibility(View.GONE);
+                    mNextVideo.setVisibility(View.GONE);
                     //videoView.start();
                 } else {
                     if (videoView != null) {
