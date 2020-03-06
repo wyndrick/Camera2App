@@ -547,7 +547,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        Size min = Collections.max(
+        Size min = Collections.min(
                 Arrays.asList(choices),
                 new CompareSizesByArea());
         Log.e(LOG_TAG, "Couldn't find any suitable video size");
@@ -999,6 +999,7 @@ public class MainActivity extends AppCompatActivity {
                 captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                 captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
                 captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
+                captureBuilder.set(CaptureRequest.JPEG_QUALITY, (byte)95);
 
                 CameraCaptureSession.CaptureCallback CaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
@@ -1316,11 +1317,13 @@ public class MainActivity extends AppCompatActivity {
         };
 
         public Uri addVideo(File videoFile) {
+
             ContentValues values = new ContentValues(3);
-            values.put(MediaStore.Video.Media.TITLE, "My video title");
+            values.put(MediaStore.Video.Media.TITLE, videoFile.getName());
             values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
             values.put(MediaStore.Video.Media.DATA, videoFile.getAbsolutePath());
             return getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+
         }
 
         public void createCameraPreviewSession() {

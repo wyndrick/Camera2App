@@ -380,8 +380,9 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
             File fileToDelete = new File(inputPath + "/" + inputFile);
             File fileNew = new File(outputPath + "/" + inputFile);
             fileToDelete.delete();
-//            updateFileGalleryInfo(fileToDelete);
-//            updateFileGalleryInfo(fileNew);
+
+            updateFileGalleryInfo(fileToDelete);
+            updateFileGalleryInfo(fileNew);
 
             return true;
         }
@@ -393,6 +394,13 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
             Log.e("tag", e.getMessage());
         }
         return false;
+    }
+
+    public void updateFileGalleryInfo(File file) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(file);
+        mediaScanIntent.setData(contentUri);
+        sendBroadcast(mediaScanIntent);
     }
 
     //Функция определяет путь до внешней извлекаемой карты
@@ -487,11 +495,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
                 showToast(getString(R.string.file_not_delete) + images.get(itemIndex));
             }
             images.remove(itemIndex);
-
-            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-            Uri contentUri = Uri.fromFile(fdelete);
-            mediaScanIntent.setData(contentUri);
-            sendBroadcast(mediaScanIntent);
+            updateFileGalleryInfo(fdelete);
 
             adapter.notifyDataSetChanged();
             viewPager.setAdapter(adapter);
@@ -505,6 +509,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     }
 
     public void onFileMoved(int itemIndex) {
+
 //        int itemIndex = images.size() - viewPager.getCurrentItem() - 1;
 //        images.remove(itemIndex);
 //        if (isNeedToShowMedia(outputPath + "/" + inputFile)) {
