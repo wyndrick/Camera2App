@@ -548,7 +548,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Size chooseVideoSize(Size[] choices) {
         Point displaySize = getDisplaySize();
-//        return new Size(176, 144);
 
         for (Size size : choices) {
             if ((1920 == size.getWidth() && 1080 == size.getHeight())) {
@@ -562,11 +561,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        Size min = Collections.min(
+        Size selected = Collections.max(
                 Arrays.asList(choices),
                 new CompareSizesByArea());
         Log.e(LOG_TAG, "Couldn't find any suitable video size");
-        return min;
+        return selected;
     }
 
 
@@ -1134,14 +1133,14 @@ public class MainActivity extends AppCompatActivity {
             int orientation = getResources().getConfiguration().orientation;
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                if (mVideoSize.getWidth() == 176) {
+                if (mVideoSize.getWidth() == 640) {
                     mTextureView.setAspectRatio((float)5 / (float)4);
                 } else {
                     mTextureView.setAspectRatio(getUIAspectRatio());
                 }
             } else {
-                if (mVideoSize.getWidth() == 176) {
-                    mTextureView.setAspectRatio((float)144 / (float)176);
+                if (mVideoSize.getWidth() == 640) {
+                    mTextureView.setAspectRatio((float)480 / (float)640);
                 } else {
                     mTextureView.setAspectRatio(getUIAspectRatio());
                 }

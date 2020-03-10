@@ -60,6 +60,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GalleryActivity2 extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static GalleryActivity2 instance;
     private String removableStoragePath = "";
     private ArrayList<String> images;
     private ArrayList<String> imagesPath;
@@ -77,16 +78,20 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     int mCurrentItem = 0;
     private String uriString;
     private boolean isAccessWriteSD;
-    private SDCardInsertionReceiver receiver;
+    private SDCardBroadcastReceiver receiver;
     private Context act;
     boolean mNotEnoguhMemory = false;
 
     private boolean mIsSDCardInserted = false;
     private boolean mIsEnoughSpace = false;
     private long freeSpace = 0;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
         setContentView(R.layout.activity_gallery2);
 
         // Hide status bar
@@ -126,27 +131,8 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
         mIsEnoughSpace = true;
 
-        File fileList[] = new File("/storage/").listFiles();
-        for (File file : fileList) {
-            String name = file.getName();
-            if (file.isDirectory() && !name.equals("emulated") && !name.equals("self")) {
-                mIsSDCardInserted = true;
-                long freeSpace = file.getFreeSpace();
-                long spaceRequired = getImagesTotalLength(images);
-                if (freeSpace < spaceRequired) {
-                    mIsEnoughSpace = false;
-                }
-            }
-        }
+        updateSDCardButtons();
 
-
-        if (mIsSDCardInserted && mIsEnoughSpace) {
-            btnCard.setVisibility(View.VISIBLE);
-            btnCardProblem.setVisibility(View.GONE);
-        } else {
-            btnCardProblem.setVisibility(View.VISIBLE);
-            btnCard.setVisibility(View.GONE);
-        }
 //        for (File file : fileList)
 //        {     if(!file.getAbsolutePath().equalsIgnoreCase(Environment.getExternalStorageDirectory().getAbsolutePath()) && file.isDirectory() && file.canRead())
 //            removableStoragePath = file.getAbsolutePath();
@@ -207,6 +193,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
 
             }
         });
+
         btnCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -262,13 +249,49 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
             }
         });
 
-
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(5);
         getLoaderManager().initLoader(0, null, this);
 
     }
 
+    public void setSDCardMounted(boolean mounted) {
+        mIsSDCardInserted = mounted;
+        if (mounted) {
+            updateSDCardButtons();
+        } else {
+            mIsEnoughSpace = true;
+            setSDCardVisible(mounted);
+        }
+    }
+    public void setSDCardVisible(boolean visible) {
+        if (visible) {
+            btnCard.setVisibility(View.VISIBLE);
+            btnCardProblem.setVisibility(View.GONE);
+        } else {
+            btnCardProblem.setVisibility(View.VISIBLE);
+            btnCard.setVisibility(View.GONE);
+        }
+    }
+
+    public void updateSDCardButtons() {
+        mIsEnoughSpace = true;
+        mIsSDCardInserted = false;
+        File fileList[] = new File("/storage/").listFiles();
+        for (File file : fileList) {
+            String name = file.getName();
+            if (file.isDirectory() && !name.equals("emulated") && !name.equals("self")) {
+                mIsSDCardInserted = true;
+                long freeSpace = file.getFreeSpace();
+                long spaceRequired = getImagesTotalLength(images);
+                if (freeSpace < spaceRequired) {
+                    mIsEnoughSpace = false;
+                }
+            }
+        }
+
+        setSDCardVisible(mIsSDCardInserted && mIsEnoughSpace);
+    }
 
     Handler moveFilesHandler;
     private int imagesTotalCount = 0;;
@@ -340,7 +363,7 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
                             Log.i(LOG_TAG, "inputFolder = " + inputPath);
                             Log.i(LOG_TAG, "outputPath = " + outputPath);
 
-                            if (moveFile(inputPath, filename, outputPath, pickedDir)) {
+                            if (copyFile(inputPath, filename, outputPath, pickedDir)) {
 //                                    onFileMoved(i);
                             }
 
@@ -358,7 +381,6 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            images.clear();
                             adapter.notifyDataSetChanged();
                             viewPager.setAdapter(adapter);
                             updateButtons(0);
@@ -399,6 +421,56 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
         Log.i(LOG_TAG, "totalSize = " + totalSize);
         return totalSize;
     }
+
+
+
+
+    private boolean copyFile(String inputPath, String inputFile, String outputPath, DocumentFile pickedDir) {
+        InputStream in = null;
+        OutputStream out = null;
+
+        try {
+            in = new FileInputStream(inputPath + "/" + inputFile);
+            DocumentFile documentFile = pickedDir.findFile(inputFile);
+            if (documentFile != null) {
+                documentFile.delete();
+            }
+
+            DocumentFile file = pickedDir.createFile("//MIME type", inputFile);
+            out = getContentResolver().openOutputStream(file.getUri());
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            in = null;
+
+            // write the output file
+            out.flush();
+            out.close();
+            out = null;
+
+            // delete the original file
+            File fileToDelete = new File(inputPath + "/" + inputFile);
+            File fileNew = new File(outputPath + "/" + inputFile);
+
+            updateFileGalleryInfo(fileToDelete);
+            updateFileGalleryInfo(fileNew);
+
+            return true;
+        }
+
+        catch (FileNotFoundException fnfe1) {
+            Log.e("tag", fnfe1.getMessage());
+        }
+        catch (Exception e) {
+            Log.e("tag", e.getMessage());
+        }
+        return false;
+    }
+
     public void onSaveToSDCardConfirm() {
         startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), 2);
     }
@@ -777,10 +849,12 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     public void registerReceiver(Context context) {
         try {
             if(receiver == null)
-                receiver = new SDCardInsertionReceiver();
+                receiver = new SDCardBroadcastReceiver();
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
             filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+            filter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);
+            filter.addAction(Intent.ACTION_MEDIA_EJECT);
             Intent sticky = context.registerReceiver(receiver, filter);
             if (sticky != null) {
                 receiver.onReceive(context, sticky);
@@ -791,19 +865,31 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     }
 
 
-    private class SDCardInsertionReceiver extends BroadcastReceiver {
+    public static class SDCardBroadcastReceiver extends BroadcastReceiver {
 
+        private static final String ACTION_MEDIA_REMOVED = "android.intent.action.MEDIA_REMOVED";
+        private static final String ACTION_MEDIA_MOUNTED = "android.intent.action.MEDIA_MOUNTED";
+        private static final String MEDIA_BAD_REMOVAL = "android.intent.action.MEDIA_BAD_REMOVAL";
+        private static final String MEDIA_EJECT = "android.intent.action.MEDIA_EJECT";
+        private static final String TAG = "SDCardBroadcastReceiver";
+        public SDCardBroadcastReceiver() {
+
+        }
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (Intent.ACTION_MEDIA_MOUNTED.equals(action)) {
+            Log.i(TAG, "Intent recieved: " + intent.getAction());
 
-                //   ..  card was inserted ..
-                showToast("card was inserted");
-            } else if (Intent.ACTION_MEDIA_UNMOUNTED.equals(action)) {
+            if (intent.getAction() == ACTION_MEDIA_MOUNTED) {
+                GalleryActivity2.instance.setSDCardMounted(true);
 
-                //   ..  card was removed ..
-                showToast("card was removed");
+            } else if (intent.getAction() == ACTION_MEDIA_REMOVED){
+                GalleryActivity2.instance.setSDCardMounted(false);
+
+            } else if(intent.getAction() == MEDIA_BAD_REMOVAL){
+                GalleryActivity2.instance.setSDCardMounted(false);
+
+            } else if (intent.getAction() == MEDIA_EJECT){
+                GalleryActivity2.instance.setSDCardMounted(false);
             }
         }
     }

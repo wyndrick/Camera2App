@@ -20,7 +20,7 @@
     <string name="camera_error">This device doesn\\\'t support Camera2 API.</string>
 
     <string name="file_move_progress">%d/%d files moved</string>
-    <string name="files_moved">All files successfully moved to SD CARD</string>
+    <string name="files_moved">All files successfully copied to SD CARD.</string>
     <string name="files_not_enough_space">Not enough space on SD CARD, %dMB required but only %dMB is available.</string>
 
 
