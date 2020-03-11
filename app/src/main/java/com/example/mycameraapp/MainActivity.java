@@ -1113,6 +1113,8 @@ public class MainActivity extends AppCompatActivity {
 
                 // Choose the sizes for camera preview and video recording
                 CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(mCameraID);
+                int deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+                Log.d(LOG_TAG, String.format("deviceLevel %d",deviceLevel));
 
                 Range<Integer> range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
                 exposureCompensation = (int)setExposure(0, range);
@@ -1130,6 +1132,9 @@ public class MainActivity extends AppCompatActivity {
                 setupCameraPreview(width, height, map);
 
                 configureTransform(width, height);
+
+
+
                 mMediaRecorder = new MediaRecorder();
                 mCameraManager.openCamera(mCameraID, mStateCallback, null);
             } catch (CameraAccessException e) {
