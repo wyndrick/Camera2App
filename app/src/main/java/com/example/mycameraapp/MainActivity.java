@@ -1136,10 +1136,10 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException("Time out waiting to lock camera opening.");
                 }
 
-                mImageReader = ImageReader.newInstance(1920, 1080,
-                        ImageFormat.JPEG, /*maxImages*/2);
-                mImageReader.setOnImageAvailableListener(
-                        mOnImageAvailableListener, mBackgroundHandler);
+//                mImageReader = ImageReader.newInstance(1920, 1080,
+//                        ImageFormat.JPEG, /*maxImages*/2);
+//                mImageReader.setOnImageAvailableListener(
+//                        mOnImageAvailableListener, mBackgroundHandler);
                 // Choose the sizes for camera preview and video recording
                 CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(mCameraID);
 
