@@ -777,52 +777,24 @@ public class MainActivity extends AppCompatActivity {
         };
 
         private void setUpMediaRecorder() throws IOException {
-            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            Integer[] profiles =  {
-                    CamcorderProfile.QUALITY_1080P,
-                    CamcorderProfile.QUALITY_HIGH,
-                    CamcorderProfile.QUALITY_720P,
-                    CamcorderProfile.QUALITY_480P,
-                    CamcorderProfile.QUALITY_LOW
-            };
-            CamcorderProfile profile = null;
-            for (Integer prof : profiles) {
-                if (CamcorderProfile.hasProfile(prof)) {
-                    profile = CamcorderProfile.get(prof);
-                }
-            }
-
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+//            CamcorderProfile cp = CamcorderProfile
+//                    .get(CamcorderProfile.QUALITY_HIGH);
+//            mMediaRecorder.setProfile(cp);
             if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
                 mNextVideoAbsolutePath = getVideoFilePath(MainActivity.this);
             }
-            mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
-
-
-            mMediaRecorder.setMaxDuration(0);
-            mMediaRecorder.setMaxFileSize(1024 * 1024 * 1024);
-
-            if (null == profile) {
-                mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-                mMediaRecorder.setMaxDuration(1000000);
-                mMediaRecorder.setMaxFileSize(500000000);
-                mMediaRecorder.setVideoEncodingBitRate(10000000);
-                mMediaRecorder.setCaptureRate(30);
-                mMediaRecorder.setVideoFrameRate(30);
-            } else {
-                mMediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
-                mMediaRecorder.setVideoFrameRate(profile.videoFrameRate);
-                mMediaRecorder.setAudioSamplingRate(profile.audioSampleRate);
-                mMediaRecorder.setAudioChannels(profile.audioChannels);
-                mMediaRecorder.setAudioEncodingBitRate(profile.audioBitRate);
-                mMediaRecorder.setCaptureRate(30);
-            }
-
+            mMediaRecorder.setMaxDuration(1000000);
+            mMediaRecorder.setMaxFileSize(500000000);
+            mMediaRecorder.setVideoEncodingBitRate(10000000);
+            mMediaRecorder.setVideoFrameRate(30);
             mMediaRecorder.setVideoSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            mMediaRecorder.setCaptureRate(30);
+
+            mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
 
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             switch (mSensorOrientation) {
