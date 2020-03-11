@@ -1157,6 +1157,13 @@ public class MainActivity extends AppCompatActivity {
             List<Size> bigEnough = new ArrayList<>();
             int w = aspectRatio.getWidth();
             int h = aspectRatio.getHeight();
+
+            for (Size option : choices) {
+                if (option.getWidth() == w && option.getHeight() == h) {
+                    return option;
+                }
+            }
+
             for (Size option : choices) {
                 if (option.getHeight() == option.getWidth() * h / w &&
                         option.getWidth() >= width && option.getHeight() >= height) {
