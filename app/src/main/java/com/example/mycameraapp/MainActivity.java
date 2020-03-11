@@ -827,9 +827,12 @@ public class MainActivity extends AppCompatActivity {
                 mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
                 List<Surface> surfaces = new ArrayList<>();
 
+                mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);
+                mPreviewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, exposureCompensation);
                 if(fpsRange != null) {
                     mPreviewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
                 }
+
 
                 // Set up Surface for the camera preview
                 Surface previewSurface = new Surface(texture);
@@ -855,6 +858,9 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+
+                                mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                                mPreviewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, exposureCompensation);
                                 if(fpsRange != null) {
                                     mPreviewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
                                 }
@@ -1107,6 +1113,10 @@ public class MainActivity extends AppCompatActivity {
 
                 // Choose the sizes for camera preview and video recording
                 CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(mCameraID);
+
+                Range<Integer> range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
+                exposureCompensation = (int)setExposure(0, range);
+
                 initFPS(characteristics);
                 StreamConfigurationMap map = characteristics
                         .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
