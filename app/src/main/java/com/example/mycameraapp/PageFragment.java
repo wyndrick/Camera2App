@@ -24,6 +24,7 @@ import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.VideoView;
 
+import java.io.IOException;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
@@ -172,6 +173,14 @@ public class PageFragment extends Fragment {
             }
         });
 
+        videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Log.d("video", "setOnErrorListener ");
+                return true;
+            }
+        });
+
         return view;
     }
 
@@ -184,8 +193,6 @@ public class PageFragment extends Fragment {
             if (imageResource != null && !TextUtils.isEmpty(imageResource)) {
                 if (isVideoFile(imageResource)) {
                     isVideo = true;
-
-
                     videoView.setVideoPath(imageResource);
                     videoView.seekTo(1);
                     videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
