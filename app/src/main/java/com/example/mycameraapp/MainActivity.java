@@ -827,6 +827,10 @@ public class MainActivity extends AppCompatActivity {
                 mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
                 List<Surface> surfaces = new ArrayList<>();
 
+                if(fpsRange != null) {
+                    mPreviewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
+                }
+
                 // Set up Surface for the camera preview
                 Surface previewSurface = new Surface(texture);
                 surfaces.add(previewSurface);
@@ -851,8 +855,9 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-
-
+                                if(fpsRange != null) {
+                                    mPreviewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
+                                }
                                 // UI
 //                                mButtonVideo.setText(R.string.stop);
                                 mIsRecordingVideo = true;
