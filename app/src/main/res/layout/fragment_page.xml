@@ -16,9 +16,13 @@
 
     <VideoView
         android:id="@+id/video_thumb"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center|center_vertical"></VideoView>
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center"></VideoView>
 
     <ImageButton
         android:id="@+id/mPauseVideo"
