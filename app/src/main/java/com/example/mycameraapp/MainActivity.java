@@ -777,26 +777,32 @@ public class MainActivity extends AppCompatActivity {
         };
 
         private void setUpMediaRecorder() throws IOException {
-            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-//            CamcorderProfile cp = CamcorderProfile
-//                    .get(CamcorderProfile.QUALITY_HIGH);
-//            mMediaRecorder.setProfile(cp);
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            CamcorderProfile cpHigh = CamcorderProfile.get(CamcorderProfile.QUALITY_1080P);
+
+            mMediaRecorder.setMaxDuration(0);
+            mMediaRecorder.setMaxFileSize(1024 * 1024 * 1024);
+
+
+            mMediaRecorder.setVideoEncodingBitRate(cpHigh.videoBitRate);
+            mMediaRecorder.setVideoFrameRate(cpHigh.videoFrameRate);
+            mMediaRecorder.setVideoSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+
+            mMediaRecorder.setAudioSamplingRate(cpHigh.audioSampleRate);
+            mMediaRecorder.setAudioChannels(cpHigh.audioChannels);
+            mMediaRecorder.setAudioEncodingBitRate(cpHigh.audioBitRate);
+            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+            mMediaRecorder.setCaptureRate(30);
             if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
                 mNextVideoAbsolutePath = getVideoFilePath(MainActivity.this);
             }
-            mMediaRecorder.setMaxDuration(1000000);
-            mMediaRecorder.setMaxFileSize(500000000);
-            mMediaRecorder.setVideoEncodingBitRate(10000000);
-            mMediaRecorder.setVideoFrameRate(30);
-            mMediaRecorder.setVideoSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            int rotation = getWindowManager().getDefaultDisplay().getRotation();
-
             mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
 
+            int rotation = getWindowManager().getDefaultDisplay().getRotation();
             switch (mSensorOrientation) {
                 case SENSOR_ORIENTATION_DEFAULT_DEGREES:
                     mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
@@ -823,6 +829,7 @@ public class MainActivity extends AppCompatActivity {
                 setUpMediaRecorder();
                 SurfaceTexture texture = mTextureView.getSurfaceTexture();
                 assert texture != null;
+
                 texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
                 mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
                 List<Surface> surfaces = new ArrayList<>();
@@ -953,8 +960,37 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void onConfigured(@NonNull CameraCaptureSession session) {
+
+                                // The camera is already closed
+                                if (null == mCameraDevice) {
+                                    return;
+                                }
+
                                 mCaptureSession = session;
-                                updatePreview();
+                                try {
+
+                                    // Auto focus should be continuous for camera preview.
+                                    mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);
+                                    mPreviewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, exposureCompensation);
+                                    // Flash is automatically enabled when necessary.
+                                    //setAutoFlash(mPreviewRequestBuilder);
+
+                                    if(fpsRange != null) {
+                                        mPreviewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
+                                    }
+                                    // Finally, we start displaying the camera preview.
+                                    mPreviewRequest = mPreviewBuilder.build();
+                                    mCaptureSession.setRepeatingRequest(mPreviewRequest,
+                                            mCaptureCallback, mBackgroundHandler);
+
+                                    //mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(),null,mBackgroundHandler);
+                                } catch (CameraAccessException e) {
+                                    e.printStackTrace();
+                                }
+
+//
+//                                mCaptureSession = session;
+//                                updatePreview();
                             }
 
                             @Override
@@ -984,10 +1020,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void setUpCaptureRequestBuilder(CaptureRequest.Builder builder) {
-            builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-            if(fpsRange != null) {
-                builder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
-            }
+//            builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+//            if(fpsRange != null) {
+//                builder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
+//            }
         }
 
         private void captureStillPicture() {
@@ -1100,8 +1136,14 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException("Time out waiting to lock camera opening.");
                 }
 
+                mImageReader = ImageReader.newInstance(1920, 1080,
+                        ImageFormat.JPEG, /*maxImages*/2);
+                mImageReader.setOnImageAvailableListener(
+                        mOnImageAvailableListener, mBackgroundHandler);
                 // Choose the sizes for camera preview and video recording
                 CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(mCameraID);
+
+
                 initFPS(characteristics);
                 StreamConfigurationMap map = characteristics
                         .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
@@ -1115,6 +1157,8 @@ public class MainActivity extends AppCompatActivity {
                 setupCameraPreview(width, height, map);
 
                 configureTransform(width, height);
+
+
                 mMediaRecorder = new MediaRecorder();
                 mCameraManager.openCamera(mCameraID, mStateCallback, null);
             } catch (CameraAccessException e) {
@@ -1140,7 +1184,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else {
                 if (mVideoSize.getWidth() == 640) {
-                    mTextureView.setAspectRatio((float)480 / (float)640);
+                    mTextureView.setAspectRatio((float)4 / (float)5);
                 } else {
                     mTextureView.setAspectRatio(getUIAspectRatio());
                 }
@@ -1149,9 +1193,16 @@ public class MainActivity extends AppCompatActivity {
 
         private Size chooseOptimalVideoSize(Size[] choices, int width, int height, Size aspectRatio) {
             // Collect the supported resolutions that are at least as big as the preview Surface
+
             List<Size> bigEnough = new ArrayList<>();
             int w = aspectRatio.getWidth();
             int h = aspectRatio.getHeight();
+
+            for (Size option : choices) {
+                if (option.getWidth() == w && option.getHeight() == h) {
+                    return option;
+                }
+            }
             for (Size option : choices) {
                 if (option.getHeight() == option.getWidth() * h / w &&
                         option.getWidth() >= width && option.getHeight() >= height) {
@@ -1279,7 +1330,8 @@ public class MainActivity extends AppCompatActivity {
             public void onOpened(@NonNull CameraDevice cameraDevice) {
                 mCameraDevice = cameraDevice;
                 mCameraOpenCloseLock.release();
-                startPreview();
+//                startPreview();
+                createCameraPreviewSession();
                 if (null != mTextureView) {
                     configureTransform(mTextureView.getWidth(), mTextureView.getHeight());
                 }
@@ -1344,6 +1396,7 @@ public class MainActivity extends AppCompatActivity {
 
         public void createCameraPreviewSession() {
             try {
+                closePreviewSession();
                 SurfaceTexture texture = mTextureView.getSurfaceTexture();
                 assert texture != null;
 
@@ -1403,8 +1456,13 @@ public class MainActivity extends AppCompatActivity {
 //                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
 //                }
 
-
-                mCameraDevice.createCaptureSession(Arrays.asList(surface,mImageReader.getSurface()),
+                List<Surface> surfaces = null;
+                if (mImageReader != null) {
+                    surfaces = Arrays.asList(surface,mImageReader.getSurface());
+                } else {
+                    surfaces = Arrays.asList(surface);
+                }
+                mCameraDevice.createCaptureSession(surfaces,
                         new CameraCaptureSession.StateCallback() {
 
                             @Override
@@ -1418,7 +1476,7 @@ public class MainActivity extends AppCompatActivity {
                                 try {
 
                                     // Auto focus should be continuous for camera preview.
-                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);
                                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, exposureCompensation);
                                     // Flash is automatically enabled when necessary.
                                     //setAutoFlash(mPreviewRequestBuilder);
