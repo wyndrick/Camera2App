@@ -777,35 +777,38 @@ public class MainActivity extends AppCompatActivity {
         };
 
         private void setUpMediaRecorder() throws IOException {
-            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            try {
+                mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+                mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 //            CamcorderProfile cp = CamcorderProfile
 //                    .get(CamcorderProfile.QUALITY_HIGH);
 //            mMediaRecorder.setProfile(cp);
-            if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
-                mNextVideoAbsolutePath = getVideoFilePath(MainActivity.this);
-            }
-            mMediaRecorder.setMaxDuration(1000000);
-            mMediaRecorder.setMaxFileSize(500000000);
-            mMediaRecorder.setVideoEncodingBitRate(10000000);
-            mMediaRecorder.setVideoFrameRate(30);
-            mMediaRecorder.setVideoSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            int rotation = getWindowManager().getDefaultDisplay().getRotation();
+                if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
+                    mNextVideoAbsolutePath = getVideoFilePath(MainActivity.this);
+                }
+                mMediaRecorder.setMaxDuration(1000000);
+                mMediaRecorder.setMaxFileSize(500000000);
+                mMediaRecorder.setVideoEncodingBitRate(10000000);
+                mMediaRecorder.setVideoSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+                mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+                mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                int rotation = getWindowManager().getDefaultDisplay().getRotation();
 
-            mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
+                mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
 
-            switch (mSensorOrientation) {
-                case SENSOR_ORIENTATION_DEFAULT_DEGREES:
-                    mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
-                    break;
-                case SENSOR_ORIENTATION_INVERSE_DEGREES:
-                    mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
-                    break;
+                switch (mSensorOrientation) {
+                    case SENSOR_ORIENTATION_DEFAULT_DEGREES:
+                        mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
+                        break;
+                    case SENSOR_ORIENTATION_INVERSE_DEGREES:
+                        mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
+                        break;
+                }
+                mMediaRecorder.prepare();
+            } catch (IllegalStateException ex) {
+                Toast.makeText(MainActivity.this, "Error while recording video", Toast.LENGTH_SHORT).show();
             }
-            mMediaRecorder.prepare();
         }
 
         private String getVideoFilePath(Context context) {
@@ -827,8 +830,6 @@ public class MainActivity extends AppCompatActivity {
                 mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
                 List<Surface> surfaces = new ArrayList<>();
 
-                mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);
-                mPreviewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, exposureCompensation);
                 if(fpsRange != null) {
                     mPreviewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
                 }
@@ -858,9 +859,6 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-
-                                mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                                mPreviewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, exposureCompensation);
                                 if(fpsRange != null) {
                                     mPreviewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
                                 }
