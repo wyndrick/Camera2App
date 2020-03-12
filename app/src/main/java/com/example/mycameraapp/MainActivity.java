@@ -1114,8 +1114,6 @@ public class MainActivity extends AppCompatActivity {
                 int deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
                 Log.d(LOG_TAG, String.format("deviceLevel %d",deviceLevel));
 
-                Range<Integer> range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
-                exposureCompensation = (int)setExposure(0, range);
 
                 initFPS(characteristics);
                 StreamConfigurationMap map = characteristics
