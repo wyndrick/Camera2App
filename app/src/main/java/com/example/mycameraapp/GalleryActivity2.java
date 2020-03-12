@@ -266,10 +266,12 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
     }
     public void setSDCardVisible(boolean visible) {
         if (visible) {
-            btnCard.setVisibility(View.VISIBLE);
+//            btnCard.setVisibility(View.VISIBLE);
             btnCardProblem.setVisibility(View.GONE);
+            btnCard.setVisibility(View.GONE);// without SD-Card UI Symbol
         } else {
-            btnCardProblem.setVisibility(View.VISIBLE);
+//            btnCardProblem.setVisibility(View.VISIBLE);
+            btnCardProblem.setVisibility(View.GONE);// without SD-Card UI Symbol
             btnCard.setVisibility(View.GONE);
         }
     }
@@ -653,7 +655,8 @@ public class GalleryActivity2 extends AppCompatActivity implements LoaderManager
             String filePath = images.get(itemIndex);
             //btnCard.setEnabled(filePath.contains("PebbleGear") ? false : true);
             //btnCard.setImageAlpha(false ? 0xFF : 0x3F);
-            btnCard.setEnabled(true);
+//            btnCard.setEnabled(true);
+            btnCard.setEnabled(false); // without SD-Card UI Symbol
             btnCard.setImageAlpha(true ? 0xFF : 0x3F);
 
 
