@@ -457,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
-            
+
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
             Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
 
@@ -777,38 +777,35 @@ public class MainActivity extends AppCompatActivity {
         };
 
         private void setUpMediaRecorder() throws IOException {
-            try {
-                mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-                mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 //            CamcorderProfile cp = CamcorderProfile
 //                    .get(CamcorderProfile.QUALITY_HIGH);
 //            mMediaRecorder.setProfile(cp);
-                if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
-                    mNextVideoAbsolutePath = getVideoFilePath(MainActivity.this);
-                }
-                mMediaRecorder.setMaxDuration(1000000);
-                mMediaRecorder.setMaxFileSize(500000000);
-                mMediaRecorder.setVideoEncodingBitRate(10000000);
-                mMediaRecorder.setVideoSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-                mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-                mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-                int rotation = getWindowManager().getDefaultDisplay().getRotation();
-
-                mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
-
-                switch (mSensorOrientation) {
-                    case SENSOR_ORIENTATION_DEFAULT_DEGREES:
-                        mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
-                        break;
-                    case SENSOR_ORIENTATION_INVERSE_DEGREES:
-                        mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
-                        break;
-                }
-                mMediaRecorder.prepare();
-            } catch (IllegalStateException ex) {
-                Toast.makeText(MainActivity.this, "Error while recording video", Toast.LENGTH_SHORT).show();
+            if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
+                mNextVideoAbsolutePath = getVideoFilePath(MainActivity.this);
             }
+            mMediaRecorder.setMaxDuration(1000000);
+            mMediaRecorder.setMaxFileSize(500000000);
+            mMediaRecorder.setVideoEncodingBitRate(10000000);
+            mMediaRecorder.setVideoFrameRate(30);
+            mMediaRecorder.setVideoSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            int rotation = getWindowManager().getDefaultDisplay().getRotation();
+
+            mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
+
+            switch (mSensorOrientation) {
+                case SENSOR_ORIENTATION_DEFAULT_DEGREES:
+                    mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
+                    break;
+                case SENSOR_ORIENTATION_INVERSE_DEGREES:
+                    mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
+                    break;
+            }
+            mMediaRecorder.prepare();
         }
 
         private String getVideoFilePath(Context context) {
@@ -829,11 +826,6 @@ public class MainActivity extends AppCompatActivity {
                 texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
                 mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
                 List<Surface> surfaces = new ArrayList<>();
-
-                if(fpsRange != null) {
-                    mPreviewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
-                }
-
 
                 // Set up Surface for the camera preview
                 Surface previewSurface = new Surface(texture);
@@ -859,9 +851,8 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if(fpsRange != null) {
-                                    mPreviewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
-                                }
+
+
                                 // UI
 //                                mButtonVideo.setText(R.string.stop);
                                 mIsRecordingVideo = true;
@@ -1111,10 +1102,6 @@ public class MainActivity extends AppCompatActivity {
 
                 // Choose the sizes for camera preview and video recording
                 CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(mCameraID);
-                int deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-                Log.d(LOG_TAG, String.format("deviceLevel %d",deviceLevel));
-
-
                 initFPS(characteristics);
                 StreamConfigurationMap map = characteristics
                         .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
@@ -1128,9 +1115,6 @@ public class MainActivity extends AppCompatActivity {
                 setupCameraPreview(width, height, map);
 
                 configureTransform(width, height);
-
-
-
                 mMediaRecorder = new MediaRecorder();
                 mCameraManager.openCamera(mCameraID, mStateCallback, null);
             } catch (CameraAccessException e) {
@@ -1168,13 +1152,6 @@ public class MainActivity extends AppCompatActivity {
             List<Size> bigEnough = new ArrayList<>();
             int w = aspectRatio.getWidth();
             int h = aspectRatio.getHeight();
-
-            for (Size option : choices) {
-                if (option.getWidth() == w && option.getHeight() == h) {
-                    return option;
-                }
-            }
-
             for (Size option : choices) {
                 if (option.getHeight() == option.getWidth() * h / w &&
                         option.getWidth() >= width && option.getHeight() >= height) {
@@ -1250,7 +1227,7 @@ public class MainActivity extends AppCompatActivity {
 //                }
             } catch (CameraAccessException e) {
                 e.printStackTrace();
-            //}
+                //}
             } catch (NullPointerException e) {
                 // Currently an NPE is thrown when the Camera2API is used but not supported on the
                 // device this code runs.
