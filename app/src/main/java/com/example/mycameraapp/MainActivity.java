@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mButtonSwitchCameraSession = null;
     private Boolean isPressed = false;
     private ImageButton mButtonToMakeShot = null;
-    private AutoFillTextureView mTextureView = null;
+    private AutoFitTextureView mTextureView = null;
     private HandlerThread mBackgroundThread;
     private Handler mBackgroundHandler = null;
     private ImageButton mButtonOpenGallery;
@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
     private int mShotSound;
     private int mStreamID;
 
+    private int currentCameraID = 0;
     private String PathPhoto;
 
     /**
@@ -338,11 +339,15 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (mCurrentSessionIsVideo) {
                     if (isPressed) {
+                        currentCameraID = CAMERA1;
                         //start camera 1 (back)
                         if (myCameras[CAMERA1] != null) {
                             if (!myCameras[CAMERA1].isOpen()) myCameras[CAMERA1].openCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         }
+
+
                     } else {
+                        currentCameraID = CAMERA2;
                         //start camera 2 (front)
                         if (myCameras[CAMERA2] != null) {
                             if (!myCameras[CAMERA2].isOpen()) myCameras[CAMERA2].openCamera(mTextureView.getWidth(), mTextureView.getHeight());
@@ -355,10 +360,12 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     if (isPressed) {
+                        currentCameraID = CAMERA1;
                         if (!myCameras[CAMERA1].isOpen()) {
                             myCameras[CAMERA1].openVideoCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         }
                     } else {
+                        currentCameraID = CAMERA2;
                         if (!myCameras[CAMERA2].isOpen()) {
                             myCameras[CAMERA2].openVideoCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         }
@@ -379,6 +386,7 @@ public class MainActivity extends AppCompatActivity {
                     //start camera 2 (front)
                     if (myCameras[CAMERA1].isOpen()) {myCameras[CAMERA1].closeCamera();}
                     if (myCameras[CAMERA2] != null) {
+                        currentCameraID = CAMERA2;
                         if (mCurrentSessionIsVideo) {
                             if (!myCameras[CAMERA2].isOpen()) myCameras[CAMERA2].openVideoCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         } else {
@@ -391,6 +399,7 @@ public class MainActivity extends AppCompatActivity {
                     //start camera 1 (back)
                     if (myCameras[CAMERA2].isOpen()) {myCameras[CAMERA2].closeCamera();}
                     if (myCameras[CAMERA1] != null) {
+                        currentCameraID = CAMERA1;
                         if (mCurrentSessionIsVideo) {
                             if (!myCameras[CAMERA1].isOpen()) myCameras[CAMERA1].openVideoCamera(mTextureView.getWidth(), mTextureView.getHeight());
                         } else {
@@ -1134,15 +1143,15 @@ public class MainActivity extends AppCompatActivity {
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 if (mVideoSize.getWidth() == 640) {
-                    mTextureView.setAspectRatio((float)5 / (float)4);
+                    mTextureView.setAspectRatio((float)5 / (float)4, currentCameraID);
                 } else {
-                    mTextureView.setAspectRatio(getUIAspectRatio());
+                    mTextureView.setAspectRatio(getUIAspectRatio(), currentCameraID);
                 }
             } else {
                 if (mVideoSize.getWidth() == 640) {
-                    mTextureView.setAspectRatio((float)480 / (float)640);
+                    mTextureView.setAspectRatio((float)480 / (float)640, currentCameraID);
                 } else {
-                    mTextureView.setAspectRatio(getUIAspectRatio());
+                    mTextureView.setAspectRatio(getUIAspectRatio(), currentCameraID);
                 }
             }
         }
