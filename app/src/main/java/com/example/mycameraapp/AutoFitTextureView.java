@@ -56,11 +56,12 @@ public class AutoFitTextureView extends TextureView {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-        if (0 == cameraId) {
-            setApectFillDimensions(width, height);
-        } else {
-            setAspectFitDimensions(width, height);
-        }
+        setAspectFitDimensions(width, height);
+//        if (0 == cameraId) {
+//            setApectFillDimensions(width, height);
+//        } else {
+//            setAspectFitDimensions(width, height);
+//        }
     }
 
     private void setAspectFitDimensions(int width, int height) {
